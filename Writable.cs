@@ -28,7 +28,7 @@ namespace TakeSwordNet5
 
         public bool WasDestroyed()
         {
-            throw new NotImplementedException();
+            return Destroyed;
         }
     }
 }

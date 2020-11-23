@@ -134,9 +134,25 @@ namespace TakeSwordNet5
                 {
                     continue;
                 }
-                else
+
+                system.Effect(CreateEntityId(entityIndex), arguments);
+                argumentIndex = 0;
+                foreach (ParameterKey parameterKey in system.ParameterKeys)
                 {
-                    system.Effect(CreateEntityId(entityIndex), arguments);
+                    if (arguments[argumentIndex] is IWritable writable)
+                    {
+                        if (writable.WasDestroyed())
+                        {
+                            componentData[parameterKey.componentId][entityIndex]
+                                = null;
+                        }
+                        else
+                        {
+                            componentData[parameterKey.componentId][entityIndex]
+                                = writable.GetWrittenValue();
+                        }
+                    }
+                    argumentIndex += 1;
                 }
             }
         }
