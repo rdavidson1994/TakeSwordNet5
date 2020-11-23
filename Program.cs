@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Linq;
+using TakeSwordNet5;
 
 namespace TakeSword
 {
@@ -21,7 +23,7 @@ namespace TakeSword
         public const int HalfNote = 2000;
         public const int WholeNote = 4000;
     }
-
+    
 
     public record Position(
         int X,
@@ -36,10 +38,10 @@ namespace TakeSword
         double Volume = 1.0
     );
 
-
     public class ValueArray<T>
     {
         private ImmutableArray<T> content;
+
 
         public ValueArray(ImmutableArray<T> content)
         {
@@ -74,7 +76,7 @@ namespace TakeSword
 
     public record Afraid(int Duration);
 
-    public record FearImmune(int Dureation);
+    public record FearImmune(int Duration);
 
     public static class Program
     {
@@ -88,7 +90,7 @@ namespace TakeSword
             var writableNote = new Writable<MusicalNote>(myNote);
             Console.WriteLine(writableNote.Value.Pitch);
             WriteableUtil.Destroy(ref writableNote);
-            // Gives a warning, as desired
+            // Gives a warning, as desired: 
             // Console.WriteLine(writableNote.Value.Pitch);
             World world = new World();
             world.RegisterComponent<MusicalNote>();

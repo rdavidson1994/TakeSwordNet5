@@ -1,12 +1,14 @@
-﻿public struct EntityId
+﻿namespace TakeSwordNet5
 {
-    internal int index;
-    internal int generation;
-
-    internal EntityId(int index, int generation)
+    public struct EntityId
     {
-        this.index = index;
-        this.generation = generation;
+        internal int index;
+        internal int generation;
+
+        internal EntityId(int index, int generation)
+        {
+            this.index = index;
+            this.generation = generation;
+        }
     }
 }
-
