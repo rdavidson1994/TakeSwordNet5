@@ -2,10 +2,10 @@
 
 namespace TakeSwordNet5
 {
-    public class Writable<T> : IWritable
-        where T : notnull
+    public class Edit<T> : IWritable
+
     {
-        public Writable(T initialValue)
+        public Edit(T initialValue)
         {
             Value = initialValue;
         }
@@ -21,14 +21,15 @@ namespace TakeSwordNet5
             Destroyed = true;
         }
 
-        public object GetWrittenValue()
-        {
-            return NewValue ?? Value;
-        }
+        public object? WrittenValue => NewValue ?? Value;
 
-        public bool WasDestroyed()
+        public bool WasDestroyed => Destroyed;
+    }
+    
+    public class Create<T> : Edit<T>, IOptional
+    {
+        public Create(T initialValue) : base(initialValue)
         {
-            return Destroyed;
         }
     }
 }

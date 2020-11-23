@@ -4,12 +4,7 @@ namespace TakeSwordNet5
 {
     public class DictionaryComponentStorage : IComponentStorage
     {
-        private Dictionary<int, object?> innerDictionary;
-
-        public DictionaryComponentStorage(Dictionary<int, object?> innerDictionary)
-        {
-            this.innerDictionary = innerDictionary;
-        }
+        private Dictionary<int, object?> innerDictionary = new();
 
         public void Expand()
         {
@@ -17,7 +12,7 @@ namespace TakeSwordNet5
         }
         public object? this[int index]
         {
-            get => innerDictionary[index];
+            get => innerDictionary.GetValueOrDefault(index);
             set => innerDictionary[index] = value;
         }
 

@@ -2,16 +2,19 @@
 
 namespace TakeSwordNet5
 {
-    internal interface IWriteWrapperFactory
+    internal interface IWrapperFactory
     {
         /// <summary>
-        /// Creates a <see cref="Writable{T}"/> containing the provided <paramref name="initialValue"/>
+        /// Creates a <see cref="Edit{T}"/> containing the provided <paramref name="initialValue"/>
         /// This method will fail with <see cref="InvalidCastException"/> if the runtime type of
         /// <paramref name="initialValue"/> does not match the generic type parameter of the underlying
-        /// <see cref="WriteWrapperFactory{T}"/> instance.
+        /// <see cref="WrapperFactory{T}"/> instance.
         /// </summary>
         /// <param name="initialValue"></param>
         /// <returns></returns>
-        public object TrustedCreate(object initialValue);
+        public object CreateWritable(object initialValue);
+
+        public object CreateOptional(object? initialValue);
+        public object CreateWritableOptional(object? initialValue);
     }
 }

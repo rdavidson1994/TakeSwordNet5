@@ -5,31 +5,42 @@ namespace TakeSwordNet5
 {
     public class World
     {
+        // Tracks the relationship between types and the component ID/index assigned to that type.
         private Dictionary<Type, int> componentIdsByType = new();
+        // Stores all data for all components. The index for this list is the component ID.
         private List<IComponentStorage> componentData = new();
-        private List<IWriteWrapperFactory> writeWrapperFactories = new();
-        private int maxEntityIndex = 0;
+        // Stores factory instances used to construct wrapper types of each component. The index for this list is the component ID.
+        private List<IWrapperFactory> writeWrapperFactories = new();
+        // The largest number of entities the world can contain before needing a resize.
+        private int maxEntityCount = 0;
+        // Tracks which entity indexes are available to be reclaimed.
         private DeadIndexList deadIndexes = new();
+        // Tracks the generation number for each entity. The index for this list is the entity index.
         private List<int> generationByEntityIndex = new();
+        // Stores each game system, in order of execution.
         private List<IdGameSystem> IdSystems = new();
 
         private ParameterKey ParameterKeyByType(Type type)
         {
-            if (
-                type.IsGenericType
-                && type.GetGenericTypeDefinition() == typeof(Writable<>))
+            bool isOptional = typeof(IOptional).IsAssignableFrom(type);
+            bool isWritable = typeof(IWritable).IsAssignableFrom(type);
+            if (isWritable || isOptional)
             {
+                // Both writable and optional parameters wrap the true component type as the first generic argument
                 Type guardedType = type.GetGenericArguments()[0];
-                return new ParameterKey(componentIdsByType[guardedType], true);
+                return new ParameterKey(componentIdsByType[guardedType], isWritable, isOptional);
             }
             else
             {
-                return new ParameterKey(componentIdsByType[type], false);
+                // Anything else is a raw (non-writable, non-optional) parameter, which doesn't have a wrapper.
+                return new ParameterKey(componentIdsByType[type], false, false);
             }
         }
 
         public void InstallSystem<T0, T1>(Action<EntityId, T0, T1> effect)
         {
+            // Convert the provided function into a "permissive" one that takes an object[].
+            // We cast each argument to the requested type at runtime.
             Action<EntityId, object[]> permissiveAction = (id, args) =>
             {
                 effect(
@@ -38,11 +49,13 @@ namespace TakeSwordNet5
                     , (T1)args[1]
                 );
             };
+            // Record the types of the requested arguments as ParameterKeys.
             ParameterKey[] componentIds = new ParameterKey[]
             {
             ParameterKeyByType(typeof(T0))
             ,ParameterKeyByType(typeof(T1))
             };
+            // Store the permissive version of the action, along with its parameter type information
             IdGameSystem system = new IdGameSystem(permissiveAction, componentIds);
             IdSystems.Add(system);
         }
@@ -68,6 +81,23 @@ namespace TakeSwordNet5
             IdGameSystem system = new IdGameSystem(permissiveAction, parameterKeys);
             IdSystems.Add(system);
         }
+
+        public void InstallSystem<T0>(Action<EntityId, T0> effect)
+        {
+            Action<EntityId, object[]> permissiveAction = (id, args) =>
+            {
+                effect(
+                    id
+                    , (T0)args[0]
+                );
+            };
+            ParameterKey[] componentIds = new ParameterKey[]
+            {
+            ParameterKeyByType(typeof(T0))
+            };
+            IdGameSystem system = new IdGameSystem(permissiveAction, componentIds);
+            IdSystems.Add(system);
+        }
         #endregion
 
         /// <summary>
@@ -81,23 +111,45 @@ namespace TakeSwordNet5
             }
         }
 
-        private EntityId CreateEntityId(int index)
+        private object? GetWrappedComponent(ParameterKey parameterKey, int entityIndex)
         {
-            return new EntityId(index, generationByEntityIndex[index]);
-        }
-
-        private object? GetComponentData(ParameterKey parameterKey, int entityIndex)
-        {
+            // First, retrieve the raw (possibly null) value found for the desired component
+            // on the desired entity. (Because this is internal, we assume the entityIndex is
+            // in-range and hasn't been marked dead.)
             object? foundComponent = componentData[parameterKey.componentId][entityIndex];
-            if (foundComponent == null)
+            // If the parameter is not optional and not writable, it doesn't need wrapping...
+            if (!parameterKey.optional && !parameterKey.needsWritable)
             {
-                return null;
+                // Just return it as is.
+                return foundComponent;
             }
-            if (parameterKey.needsWritable)
+            // Otherwise retrieve a factory to create a wrapper for it.
+            IWrapperFactory factory = writeWrapperFactories[parameterKey.componentId];
+
+            // If the parameter is optional. we don't care about null values
+            if (parameterKey.optional)
             {
-                IWriteWrapperFactory factory = writeWrapperFactories[parameterKey.componentId];
-                return factory.TrustedCreate(foundComponent);
+                // If writing is needed, create a writable optional wrapper
+                if (parameterKey.needsWritable)
+                {
+                    return factory.CreateWritableOptional(foundComponent);
+                }
+                // Otherwise create a normal optional wrapper
+                else
+                {
+                    return factory.CreateOptional(foundComponent);
+                }
             }
+
+            // If the component is required and needs writing,
+            // create a non-optional Writable wrapper - but only
+            // if the wrapped value is non null.
+            if (parameterKey.needsWritable && foundComponent != null)
+            {
+                return factory.CreateWritable(foundComponent);
+            }
+            // In any other case, return the retrieved value - 
+            // which will propogate null if the component wasn't optional.
             else
             {
                 return foundComponent;
@@ -106,7 +158,7 @@ namespace TakeSwordNet5
 
         private void RunSystem(IdGameSystem system)
         {
-            for (int entityIndex = 0; entityIndex < maxEntityIndex; entityIndex++)
+            for (int entityIndex = 0; entityIndex < maxEntityCount; entityIndex++)
             {
                 if (deadIndexes.Contains(entityIndex))
                 {
@@ -118,38 +170,56 @@ namespace TakeSwordNet5
                 int argumentIndex = 0;
                 foreach (ParameterKey parameterKey in system.ParameterKeys)
                 {
-                    object? foundComponent = GetComponentData(parameterKey, entityIndex);
+                    // For each argument the system needs
+                    // Attempt to retrieve the entity's corresponding component from storage.
+                    object? foundComponent = GetWrappedComponent(parameterKey, entityIndex);
                     if (foundComponent == null)
                     {
+                        // If GetWrappedComponent returned null, the component was
+                        // missing from the entity and the parameter was not optional,
+                        // so we shouldn't execute the system on this entity.
                         missingComponents = true;
                         break;
                     }
                     else
                     {
+                        // Otherwise, record the component in our arguments list.
                         arguments[argumentIndex] = foundComponent;
                         argumentIndex += 1;
                     }
                 }
+
+                // If any required components were absent, skip to the next entity.
                 if (missingComponents)
                 {
                     continue;
                 }
 
-                system.Effect(CreateEntityId(entityIndex), arguments);
+                // Otherwise, execute the system's effect on the arguments retrieved for this entity.
+                system.Effect(
+                    new EntityId(entityIndex, generationByEntityIndex[entityIndex]),
+                    arguments
+                );
+
+                // Now that the system code has been run, update the entity's components to 
+                // reflect changes in each of the system's writable arguments.
                 argumentIndex = 0;
                 foreach (ParameterKey parameterKey in system.ParameterKeys)
                 {
+                    // Only consider parameters marked as writable
                     if (arguments[argumentIndex] is IWritable writable)
                     {
-                        if (writable.WasDestroyed())
+                        if (writable.WasDestroyed)
                         {
+                            // If the component was marked for destruction, set it to null
                             componentData[parameterKey.componentId][entityIndex]
                                 = null;
                         }
                         else
                         {
+                            // Otherwise apply the updated value.
                             componentData[parameterKey.componentId][entityIndex]
-                                = writable.GetWrittenValue();
+                                = writable.WrittenValue;
                         }
                     }
                     argumentIndex += 1;
@@ -176,12 +246,24 @@ namespace TakeSwordNet5
             return (T?)componentData[componentId][entityId.index];
         }
 
-        public void RegisterComponent<T>() where T : notnull
+        public void RegisterComponent<T>() where T : class
         {
             // This list will be full of "value=null, generation=0" at first
-            ListComponentStorage entries = new ListComponentStorage(maxEntityIndex);
+            ListComponentStorage entries = new ListComponentStorage(maxEntityCount);
+            RegisterComponent<T>(entries);
+        }
+
+        public void RegisterSparseComponent<T>() where T : class
+        {
+            DictionaryComponentStorage entries = new DictionaryComponentStorage();
+            RegisterComponent<T>(entries);
+        }
+
+        internal void RegisterComponent<T>(IComponentStorage entries)
+            where T : class
+        {
             componentData.Add(entries);
-            writeWrapperFactories.Add(new WriteWrapperFactory<T>());
+            writeWrapperFactories.Add(new WrapperFactory<T>());
             componentIdsByType[typeof(T)] = componentData.Count - 1;
         }
 
@@ -211,9 +293,14 @@ namespace TakeSwordNet5
         /// <returns></returns>
         private int GetComponentId<T>()
         {
-            if (!componentIdsByType.TryGetValue(typeof(T), out int componentId))
+            return GetComponentId(typeof(T));
+        }
+
+        private int GetComponentId(Type type)
+        {
+            if (!componentIdsByType.TryGetValue(type, out int componentId))
             {
-                throw new Exception($"No component registered for {typeof(T)}");
+                throw new Exception($"No component registered for {type}");
             }
             return componentId;
         }
@@ -233,21 +320,28 @@ namespace TakeSwordNet5
             componentData[componentId].Remove(entityId.index);
         }
 
+
         /// <summary>
-        /// Create a new entity, with no components set.
+        /// create a new entity, with the requested components set.
         /// </summary>
+        /// <param name="components">The list of components to set on the entity.
+        /// The runtime type of each argument will be used, not "object".</param>
         /// <returns>The id of the newly created entity.</returns>
-        public EntityId CreateEntity()
+        public EntityId CreateEntity(params object[] components)
         {
-            // Look for destroyed entities and reclaim their indexes
-            if (deadIndexes.ReclaimIndex(out int indexToUsurp))
+            EntityId output;
+            // Try to reclaim a vacant index
+            if (deadIndexes.ReclaimIndex(out int indexToReclaim))
             {
                 foreach (IComponentStorage componentStorage in componentData)
                 {
-                    componentStorage[indexToUsurp] = null;
+                    // Clear lingering component data at the vacant index
+                    componentStorage.Remove(indexToReclaim);
                 }
-                return new EntityId(indexToUsurp, generationByEntityIndex[indexToUsurp]);
+                output = new EntityId(indexToReclaim, generationByEntityIndex[indexToReclaim]);
             }
+
+            // If no vacant index is available, expand all storage by 1 and return the new final index.
             else
             {
                 foreach (IComponentStorage componentStorage in componentData)
@@ -256,9 +350,18 @@ namespace TakeSwordNet5
                 }
                 generationByEntityIndex.Add(0);
                 deadIndexes.AddLivingMember();
-                maxEntityIndex += 1;
-                return new EntityId(maxEntityIndex - 1, 0);
+                maxEntityCount += 1;
+                output = new EntityId(maxEntityCount - 1, 0);
             }
+
+            // Add the users requested components.
+            foreach (object component in components)
+            {
+                Type realType = component.GetType();
+                int componentId = GetComponentId(realType);
+                componentData[componentId][output.index] = component;
+            }
+            return output;
         }
 
         private bool EntityIsCurrent(EntityId entityId)

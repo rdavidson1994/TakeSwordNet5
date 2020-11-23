@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.Collections.Generic;
 using System.Linq;
 using TakeSwordNet5;
+using System.Runtime.CompilerServices;
 
 namespace TakeSword
 {
@@ -77,17 +78,28 @@ namespace TakeSword
     public record Afraid(int Duration);
 
     public record FearImmune(int Duration);
-
+    public record Lycanthropy();
+    public record WerewolfState(int Duration);
     public static class Program
     {
+        public static void Whatever(Action<ITuple> tupleAction)
+        {
+
+        }
+
+        public static Action<ITuple> Normalize<T0,T1>(Action<Tuple<T0,T1>> tupAction)
+        {
+
+        }
         public static void Main(string[] args)
         {
+            Whatever(Tuple.Create(1, "Hello"));
             var myNote = new MusicalNote(
                 Pitch: 400,
                 Durations.HalfNote,
                 Instrument.SineWave
             );
-            var writableNote = new Writable<MusicalNote>(myNote);
+            var writableNote = new Edit<MusicalNote>(myNote);
             Console.WriteLine(writableNote.Value.Pitch);
             WriteableUtil.Destroy(ref writableNote);
             // Gives a warning, as desired: 
@@ -100,38 +112,76 @@ namespace TakeSword
             world.RegisterComponent<Mind>();
             world.RegisterComponent<Afraid>();
             world.RegisterComponent<FearImmune>();
-            EntityId aliceId = world.CreateEntity();
-            world.SetComponent(aliceId, new MusicalNote(440));
-            world.SetComponent(aliceId, new Position(10, 20, 30));
-            EntityId bobId = world.CreateEntity();
-            world.SetComponent(bobId, new Health(100, 20));
-            world.SetComponent(bobId, new Mind());
-            world.SetComponent(bobId, new Name("Bob"));
+            world.RegisterSparseComponent<Lycanthropy>();
+            world.RegisterSparseComponent<WerewolfState>();
+            EntityId aliceId = world.CreateEntity(
+                new MusicalNote(440),
+                new Position(10, 20, 30),
+                new Lycanthropy(),
+                new Name("Alice")
+            );
+            EntityId bobId = world.CreateEntity(
+                new Health(100, 20),
+                new Mind(),
+                new Name("Bob"),
+                new Lycanthropy()
+            );
             world.InstallSystem<MusicalNote, Position>((id, note, p) =>
             {
                 Console.WriteLine($"You hear a {note.Pitch} Hz note at ({p.X},{p.Y},{p.Z}), with volume={note.Volume}.");
                 world.SetComponent<MusicalNote>(id, note with { Volume = note.Volume * 0.5 });
             });
 
-            world.InstallSystem((EntityId id, Writable<Health> health, Mind ai, Name name) =>
+            world.InstallSystem((EntityId id, Lycanthropy lycanthropy, Create<WerewolfState> werewolfState, Optional<Name> name) =>
             {
-                if (world.GetComponent<Afraid>(id) != null)
+                bool isFullMoon = new Random().Next(0, 1) == 0;
+                if (!isFullMoon || werewolfState.Value != null)
+                {
+                    return;
+                }
+                if (name.Value != null)
+                {
+                    Console.WriteLine($"{name.Value.Data} is becoming a werewolf!");
+                }
+                else
+                {
+                    Console.WriteLine("Becoming a werewolf!");
+                }
+                werewolfState.Write(new WerewolfState(10));
+            });
+            
+            world.InstallSystem((EntityId id, Edit<WerewolfState> werewolfState) =>
+            {
+                int d = werewolfState.Value.Duration;
+                if (d == 0)
+                {
+                    werewolfState.Destroy();
+                }
+                else
+                {
+                    werewolfState.Write(werewolfState.Value with { Duration = d - 1 });
+                }
+            });
+
+            world.InstallSystem((EntityId id, Edit<Health> health, Name name, Create<Afraid> afraid) =>
+            {
+                if (afraid.Value is not null)
                 {
                     return;
                 }
                 if (health.Value.HP < health.Value.HPMax / 2)
                 {
                     Console.WriteLine($"{name.Data} becomes shaken!");
-                    world.SetComponent(id, new Afraid(3));
+                    afraid.Write(new Afraid(3));
                 }
             });
 
-            world.InstallSystem((EntityId id, Writable<Afraid> afraid, Name name) =>
+            world.InstallSystem((EntityId id, Edit<Afraid> afraid, Name name, Create<FearImmune> fearImmune) =>
             {
                 if (afraid.Value.Duration == 0)
                 {
                     afraid.Destroy();
-                    world.SetComponent(id, new FearImmune(3));
+                    fearImmune.Write(new FearImmune(3));
                 }
                 else
                 {

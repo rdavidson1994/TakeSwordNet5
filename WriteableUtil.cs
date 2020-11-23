@@ -1,8 +1,24 @@
-﻿namespace TakeSwordNet5
+﻿using System;
+
+namespace TakeSwordNet5
 {
     public static class WriteableUtil
     {
-        public static void Destroy<T>(ref Writable<T>? writableT) where T : class
+        public static Action<EntityId, Edit<T>> DecaySystem<T>(Action<Edit<T>> tick, Func<T, bool> done)
+        {
+            return (id, editT) =>
+            {
+                if (done(editT.Value))
+                {
+                    editT.Destroy();
+                }
+                else
+                {
+                    tick(editT);
+                }
+            };
+        }
+        public static void Destroy<T>(ref Edit<T>? writableT) where T : class
         {
             if (writableT != null)
             {
