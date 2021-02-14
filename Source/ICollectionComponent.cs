@@ -4,7 +4,7 @@ namespace TakeSwordNet5
 {
     public interface ICollectionComponent
     {
-        List<EntityId> Memberships { get; }
+        List<EntityId> Members { get; }
 
         IEnumerable<Entity> EnumerateMembers(World world);
     }

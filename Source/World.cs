@@ -10,13 +10,13 @@ namespace TakeSwordNet5
         private Dictionary<Type, int> componentIdsByType = new();
         // Tracks the reason each Type was registered, for more detailed error message.
         private Dictionary<Type, string> registrationReasonByType = new();
-        // Tracks the member-data type for each collection-data component
-        private Dictionary<Type, Type> memberTypesByCollectionType = new();
-        // Tracks the collection-data type for each member-data component
-        private Dictionary<Type, Type> collectionTypesByMemberType = new();
-        // Stores all data for all components. The index for this list is the component ID.
+        // Tracks which types have been registered as collection membership components
+        private HashSet<Type> membershipComponentTypes = new();
+        // Stores all data for all components.
+        // The index for this list is the component ID.
         private List<IComponentStorage> componentData = new();
-        // Stores factory instances used to construct wrapper types of each component. The index for this list is the component ID.
+        // Stores factory instances used to construct wrapper types of each component. 
+        // The index for this list is the component ID.
         private List<IWrapperFactory> writeWrapperFactories = new();
         // The largest number of entities the world can contain before needing a resize.
         private int maxEntityCount = 0;
@@ -325,7 +325,7 @@ namespace TakeSwordNet5
             if (!componentIdsByType.TryGetValue(type, out int componentId))
             {
                 string errorMessage = $"Type {type} has not been registered as a component.";
-                if (registrationReasonByType.TryGetValue(type, out string reason))
+                if (registrationReasonByType.TryGetValue(type, out string? reason))
                 {
                     errorMessage += $" (It has been registered as a {reason} though.)";
                 }
@@ -383,7 +383,7 @@ namespace TakeSwordNet5
                 output = new EntityId(maxEntityCount - 1, 0);
             }
 
-            // Add the users requested components.
+            // Add the user's requested components.
             foreach (object component in components)
             {
                 Type realType = component.GetType();
@@ -428,7 +428,7 @@ namespace TakeSwordNet5
         /// <summary>
         /// Destroy an entity, freeing space for the creation of new ones.
         /// NOTE: Any future usage of this entity's id, except for 
-        /// <see cref="GetComponent{T}(EntityId)"/>, will result in an exceptions.
+        /// <see cref="GetComponent{T}(EntityId)"/>, will result in an exception.
         /// </summary>
         /// <param name="entityId">The id of the entity to destroy</param>
         public void DestroyEntity(EntityId entityId)
@@ -446,104 +446,111 @@ namespace TakeSwordNet5
             }
         }
 
-        public void RegisterCollection<TCollection, TMember>()
+        public void RegisterCollection<TMember>()
         {
-            ReserveType(typeof(TCollection), "collection component");
-            ReserveType(typeof(TCollection), "membership component");
-            RegisterComponent<CollectionComponent<TCollection>>();
+            ReserveType(typeof(TMember), "membership component");
+            membershipComponentTypes.Add(typeof(TMember));
             RegisterComponent<MembershipComponent<TMember>>();
+            RegisterComponent<CollectionComponent<TMember>>();
             Type membershipComponentType = typeof(MembershipComponent<TMember>);
-            Type collectionComponentType = typeof(CollectionComponent<TCollection>);
-            collectionTypesByMemberType[membershipComponentType] = collectionComponentType;
-            memberTypesByCollectionType[collectionComponentType] = membershipComponentType;
         }
 
-        public (IEnumerable<Entity>, C)? GetCollectionComponent<C>(EntityId entityId)
+        public IEnumerable<Entity> GetMembers<M>(EntityId entityId)
         {
-            CollectionComponent<C>? found = GetComponent<CollectionComponent<C>>(entityId);
+            CollectionComponent<M>? found = GetComponent<CollectionComponent<M>>(entityId);
             if (found == null)
             {
-                return null;
+                return Enumerable.Empty<Entity>();
             }
             else
             {
-                return (found.EnumerateMembers(this), found.CollectionData);
+                return found.EnumerateMembers(this);
             }
         }
 
-        private ICollectionComponent? GetAnonymousCollectionComponent(Type type, EntityId entityId)
+        public Tuple<M, EntityId>? GetMembership<M>(EntityId entityId)
         {
-            if (!typeof(ICollectionComponent).IsAssignableFrom(type))
+            MembershipComponent<M>? membershipComponent = GetComponent<MembershipComponent<M>>(entityId);
+            if (membershipComponent is null)
             {
-                throw new Exception($"The given type {type} does not implement ICollectionComponent.");
+                return null;
             }
-            return (ICollectionComponent?)GetComponent(type, entityId);
+
+            if (!EntityIsCurrent(membershipComponent.Collection))
+            {
+                return null;
+            }
+            return Tuple.Create(membershipComponent.MembershipData, membershipComponent.Collection);
         }
 
-        public void SetCollectionComponent<C>(EntityId entityId, C collectionData)
-        {
-            SetComponent(entityId, new CollectionComponent<C>(collectionData));
-        }
-
-        public void SetMemberComponent<M>(EntityId memberEntityId, M memberData, EntityId collectionEntityId)
+        public void SetMembership<M>(EntityId memberId, M memberData, EntityId destinationCollectionId)
             where M : class
         {
-            if (!collectionTypesByMemberType
-                .TryGetValue(typeof(MembershipComponent<M>), out Type? collectionComponentType))
+            // Ensure that the type M actually is a registered membership component.
+            // Throw an exception otherwise.
+            if (!membershipComponentTypes.Contains(typeof(M)))
             {
                 throw new Exception($"Type {typeof(M)} is not a membership component.");
             }
-            CheckEntityIsCurrent(memberEntityId);
-            ICollectionComponent? newCollectionData = GetAnonymousCollectionComponent(
-                collectionComponentType,
-                collectionEntityId
-            );
-            if (newCollectionData is null)
-            {
-                // ??? throw an error. Seems like a dangerous api. Might reconsider this
-            }
-            // Retrieve existing member data from the member entity, if any.
-            MembershipComponent<M>? previousMemberData = GetComponent<MembershipComponent<M>>(memberEntityId);
+
+            // Verify that the entity id's given are both alive.
+            CheckEntityIsCurrent(memberId);
+            CheckEntityIsCurrent(destinationCollectionId);
+
+            // Retrieve existing membership data from the member entity, if any.
+            MembershipComponent<M>? previousMemberData = GetComponent<MembershipComponent<M>>(memberId);
+
             // Set the new member data for the member entity.
-            SetComponent(memberEntityId, new MembershipComponent<M>(memberData));
-            if (collectionEntityId.Equals(previousMemberData?.Collection))
+            SetComponent(memberId, new MembershipComponent<M>(memberData, destinationCollectionId));
+
+            // If the collection entity is the same as the previous one, no other changes are needed
+            if (destinationCollectionId.Equals(previousMemberData?.Collection))
             {
-                // If the collection entity is the same as the previous one,
-                // no update to any collection's cache of members is needed.
                 return;
             }
 
+            // Otherwise, add the member to the destination collection - creating a new collection component if needed.
+            CollectionComponent<M>? destinationCollectionData
+                = GetComponent<CollectionComponent<M>>(destinationCollectionId);
+            if (destinationCollectionData is null)
+            {
+                CollectionComponent<M> newCollectionData = new();
+                SetComponent(destinationCollectionId, newCollectionData);
+                destinationCollectionData = newCollectionData;
+            }
+            destinationCollectionData.Members.Add(memberId);
 
+            // If the new member entity had no previous collection, we are all done.
+            if (previousMemberData is null)
+            {
+                return;
+            }
 
+            // Otherwise, retrieve the data for the previous collection.
+            EntityId previousCollectionId = previousMemberData.Collection;
+            CollectionComponent<M>? previousCollectionComponent = GetComponent<CollectionComponent<M>>(previousCollectionId);
 
+            // If it's missing (probably because the entity has been trashed), no action is needed
+            if (previousCollectionComponent is null)
+            {
+                return;
+            }
+
+            // Otherwise, remove this member from it.
+            previousCollectionComponent.Members.Remove(memberId);
         }
 
         private class CollectionComponent<T> : ICollectionComponent
         {
-            public T CollectionData { get; set; }
-            public List<EntityId> Memberships { get; } = new();
-
-            public CollectionComponent(T collectionData)
-            {
-                CollectionData = collectionData;
-            }
+            public List<EntityId> Members { get; } = new();
 
             public IEnumerable<Entity> EnumerateMembers(World world)
             {
-                Memberships.RemoveAll(e => !world.EntityIsCurrent(e));
-                return Memberships.Select(e => new Entity(e, world));
+                Members.RemoveAll(e => !world.EntityIsCurrent(e));
+                return Members.Select(e => new Entity(e, world));
             }
         }
 
-        private class MembershipComponent<T> : IMembershipComponent
-        {
-            public T MembershipData { get; set; }
-            public EntityId Collection { get; set; }
-
-            public MembershipComponent(T membershipData)
-            {
-                MembershipData = membershipData;
-            }
-        }
+        private record MembershipComponent<T>(T MembershipData, EntityId Collection);
     }
 }
