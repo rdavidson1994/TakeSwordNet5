@@ -4,6 +4,13 @@ using System.Linq;
 
 namespace TakeSword
 {
+    public class ComponentException : Exception
+    {
+        internal ComponentException(string message) : base(message)
+        {
+
+        }
+    }
     public class World
     {
         // Tracks the relationship between types and the component ID/index assigned to that type.
@@ -31,7 +38,7 @@ namespace TakeSword
         {
             if (registrationReasonByType.TryGetValue(type, out string? conflictingReason))
             {
-                throw new Exception($"Tried to register {type} as a {reason}, " +
+                throw new ComponentException($"Tried to register {type} as a {reason}, " +
                     $"but was already registred as a {conflictingReason}.");
             }
         }
@@ -304,7 +311,7 @@ namespace TakeSword
             int componentId = GetComponentId<T>();
             if (!EntityIsCurrent(entityId))
             {
-                throw new Exception("Entity has already been destroyed");
+                throw new ComponentException("Entity has already been destroyed");
             }
             componentData[componentId][entityId.index] = componentValue;
         }
@@ -329,7 +336,7 @@ namespace TakeSword
                 {
                     errorMessage += $" (It has been registered as a {reason} though.)";
                 }
-                throw new Exception($"No component registered for {type}");
+                throw new ComponentException($"No component registered for {type}");
             }
             return componentId;
         }
@@ -344,7 +351,7 @@ namespace TakeSword
             int componentId = GetComponentId<T>();
             if (!EntityIsCurrent(entityId))
             {
-                throw new Exception("Entity has already been destroyed");
+                throw new ComponentException("Entity has already been destroyed");
             }
             componentData[componentId].Remove(entityId.index);
         }
@@ -442,7 +449,7 @@ namespace TakeSword
         {
             if (!EntityIsCurrent(entityId))
             {
-                throw new Exception("Entity has already been destroyed");
+                throw new ComponentException("Entity has already been destroyed");
             }
         }
 
@@ -490,7 +497,7 @@ namespace TakeSword
             // Throw an exception otherwise.
             if (!membershipComponentTypes.Contains(typeof(M)))
             {
-                throw new Exception($"Type {typeof(M)} is not a membership component.");
+                throw new ComponentException($"Type {typeof(M)} is not a membership component.");
             }
 
             // Verify that the entity id's given are both alive.
