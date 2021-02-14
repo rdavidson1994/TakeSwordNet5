@@ -1,4 +1,4 @@
-﻿namespace TakeSwordNet5
+﻿namespace TakeSword
 {
     /// <summary>
     /// When used as a system parameter, indicates that null values should still be matched.

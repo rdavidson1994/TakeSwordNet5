@@ -1,4 +1,4 @@
-﻿namespace TakeSwordNet5
+﻿namespace TakeSword
 {
     internal interface IWritable
     {

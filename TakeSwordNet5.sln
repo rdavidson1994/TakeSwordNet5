@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30711.63
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TakeSwordNet5", "TakeSword\TakeSwordNet5.csproj", "{F4FFF857-CD38-431D-8921-6EA0E904C87B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TakeSword", "TakeSword\TakeSword.csproj", "{F4FFF857-CD38-431D-8921-6EA0E904C87B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

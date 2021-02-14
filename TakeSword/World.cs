@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TakeSwordNet5
+namespace TakeSword
 {
     public class World
     {

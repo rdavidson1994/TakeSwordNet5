@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TakeSwordNet5
+namespace TakeSword
 {
     public class Edit<T> : IWritable
 

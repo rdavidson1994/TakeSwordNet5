@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace TakeSwordNet5
+namespace TakeSword
 {
     internal class DeadIndexList : IEnumerable<int>
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TakeSwordNet5
+namespace TakeSword
 {
     public class ListComponentStorage : IComponentStorage
     {

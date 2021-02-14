@@ -1,4 +1,4 @@
-﻿namespace TakeSwordNet5
+﻿namespace TakeSword
 {
     internal class WrapperFactory<T> : IWrapperFactory
         where T : class
