@@ -87,13 +87,8 @@ namespace TakeSword
 
         }
 
-        public static Action<ITuple> Normalize<T0,T1>(Action<Tuple<T0,T1>> tupAction)
-        {
-
-        }
         public static void Main(string[] args)
         {
-            Whatever(Tuple.Create(1, "Hello"));
             var myNote = new MusicalNote(
                 Pitch: 400,
                 Durations.HalfNote,

@@ -2,9 +2,9 @@
 
 namespace TakeSwordNet5
 {
-    public class IdGameSystem
+    public class GameSystem
     {
-        internal IdGameSystem(Action<EntityId, object[]> effect, ParameterKey[] parameterKeys)
+        internal GameSystem(Action<EntityId, object[]> effect, ParameterKey[] parameterKeys)
         {
             Effect = effect;
             ParameterKeys = parameterKeys;

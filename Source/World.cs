@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TakeSwordNet5
 {
@@ -7,6 +8,8 @@ namespace TakeSwordNet5
     {
         // Tracks the relationship between types and the component ID/index assigned to that type.
         private Dictionary<Type, int> componentIdsByType = new();
+        // Tracks the reason each Type was registered, for more detailed error message.
+        private Dictionary<Type, string> registrationReasonByType = new();
         // Stores all data for all components. The index for this list is the component ID.
         private List<IComponentStorage> componentData = new();
         // Stores factory instances used to construct wrapper types of each component. The index for this list is the component ID.
@@ -18,23 +21,34 @@ namespace TakeSwordNet5
         // Tracks the generation number for each entity. The index for this list is the entity index.
         private List<int> generationByEntityIndex = new();
         // Stores each game system, in order of execution.
-        private List<IdGameSystem> IdSystems = new();
+        private List<GameSystem> Systems = new();
+
+        private void ReserveType(Type type, string reason)
+        {
+            if (registrationReasonByType.TryGetValue(type, out string? conflictingReason))
+            {
+                throw new Exception($"Tried to register {type} as a {reason}, " +
+                    $"but was already registred as a {conflictingReason}.");
+            }
+        }
 
         private ParameterKey ParameterKeyByType(Type type)
         {
             bool isOptional = typeof(IOptional).IsAssignableFrom(type);
             bool isWritable = typeof(IWritable).IsAssignableFrom(type);
+            Type targetType;
             if (isWritable || isOptional)
             {
                 // Both writable and optional parameters wrap the true component type as the first generic argument
-                Type guardedType = type.GetGenericArguments()[0];
-                return new ParameterKey(componentIdsByType[guardedType], isWritable, isOptional);
+                targetType = type.GetGenericArguments()[0];
             }
             else
             {
                 // Anything else is a raw (non-writable, non-optional) parameter, which doesn't have a wrapper.
-                return new ParameterKey(componentIdsByType[type], false, false);
+                targetType = type;
             }
+            int componentId = componentIdsByType[targetType];
+            return new ParameterKey(componentId, isWritable, isOptional);
         }
 
         public void InstallSystem<T0, T1>(Action<EntityId, T0, T1> effect)
@@ -56,8 +70,8 @@ namespace TakeSwordNet5
             ,ParameterKeyByType(typeof(T1))
             };
             // Store the permissive version of the action, along with its parameter type information
-            IdGameSystem system = new IdGameSystem(permissiveAction, componentIds);
-            IdSystems.Add(system);
+            GameSystem system = new GameSystem(permissiveAction, componentIds);
+            Systems.Add(system);
         }
 
         #region Additional IstallSystem implementations
@@ -78,8 +92,8 @@ namespace TakeSwordNet5
             ,ParameterKeyByType(typeof(T1))
             ,ParameterKeyByType(typeof(T2))
             };
-            IdGameSystem system = new IdGameSystem(permissiveAction, parameterKeys);
-            IdSystems.Add(system);
+            GameSystem system = new GameSystem(permissiveAction, parameterKeys);
+            Systems.Add(system);
         }
 
         public void InstallSystem<T0>(Action<EntityId, T0> effect)
@@ -95,8 +109,8 @@ namespace TakeSwordNet5
             {
             ParameterKeyByType(typeof(T0))
             };
-            IdGameSystem system = new IdGameSystem(permissiveAction, componentIds);
-            IdSystems.Add(system);
+            GameSystem system = new GameSystem(permissiveAction, componentIds);
+            Systems.Add(system);
         }
         #endregion
 
@@ -105,7 +119,7 @@ namespace TakeSwordNet5
         /// </summary>
         public void Run()
         {
-            foreach (IdGameSystem system in IdSystems)
+            foreach (GameSystem system in Systems)
             {
                 RunSystem(system);
             }
@@ -156,7 +170,7 @@ namespace TakeSwordNet5
             }
         }
 
-        private void RunSystem(IdGameSystem system)
+        private void RunSystem(GameSystem system)
         {
             for (int entityIndex = 0; entityIndex < maxEntityCount; entityIndex++)
             {
@@ -262,6 +276,7 @@ namespace TakeSwordNet5
         internal void RegisterComponent<T>(IComponentStorage entries)
             where T : class
         {
+            ReserveType(typeof(T), "component");
             componentData.Add(entries);
             writeWrapperFactories.Add(new WrapperFactory<T>());
             componentIdsByType[typeof(T)] = componentData.Count - 1;
@@ -364,10 +379,37 @@ namespace TakeSwordNet5
             return output;
         }
 
-        private bool EntityIsCurrent(EntityId entityId)
+        /// <summary>
+        /// Determines whether the entity identified by <paramref name="entityId"/>
+        /// still exists in the world.
+        /// </summary>
+        /// <param name="entityId"></param>
+        /// <returns></returns>
+        public bool EntityIsCurrent(EntityId entityId)
         {
             return generationByEntityIndex[entityId.index] == entityId.generation;
         }
+
+
+        /// <summary>
+        /// Verify that the entity referenced by the given <paramref name="entityId"/>
+        /// still exists, and if so, return it as an <see cref="Entity"/> instance.
+        /// Otherwise, returns null.
+        /// </summary>
+        /// <param name="entityId"></param>
+        /// <returns></returns>
+        public Entity? RetrieveEntity(EntityId entityId)
+        {
+            if (EntityIsCurrent(entityId))
+            {
+                return new Entity(entityId, this);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
 
         /// <summary>
         /// Destroy an entity, freeing space for the creation of new ones.
@@ -377,12 +419,71 @@ namespace TakeSwordNet5
         /// <param name="entityId">The id of the entity to destroy</param>
         public void DestroyEntity(EntityId entityId)
         {
+            CheckEntityIsCurrent(entityId);
+            generationByEntityIndex[entityId.index] += 1;
+            deadIndexes.MarkDead(entityId.index);
+        }
+
+        private void CheckEntityIsCurrent(EntityId entityId)
+        {
             if (!EntityIsCurrent(entityId))
             {
                 throw new Exception("Entity has already been destroyed");
             }
-            generationByEntityIndex[entityId.index] += 1;
-            deadIndexes.MarkDead(entityId.index);
+        }
+
+        public void RegisterCollection<TCollection, TMember>()
+        {
+            ReserveType(typeof(TCollection), "collection component");
+            ReserveType(typeof(TCollection), "membership component");
+            RegisterComponent<CollectionComponent<TCollection>>();
+            RegisterComponent<MembershipComponent<TMember>>();
+        }
+
+        public (IEnumerable<Entity>, C)? GetCollectionComponent<C>(EntityId entityId)
+        {
+            CollectionComponent<C>? found = GetComponent<CollectionComponent<C>>(entityId);
+            if (found == null)
+            {
+                return null;
+            }
+            else
+            {
+                return (found.EnumerateMembers(this), found.CollectionData);
+            }
+        }
+
+        public void SetCollectionComponent<C>(EntityId entityId, C collectionData)
+        {
+            SetComponent<CollectionComponent<C>>(entityId, new CollectionComponent<C>(collectionData));
+        }
+
+        private class CollectionComponent<T>
+        {
+            public T CollectionData { get; set; }
+            public List<EntityId> Memberships = new();
+
+            public CollectionComponent(T collectionData)
+            {
+                CollectionData = collectionData;
+            }
+
+            public IEnumerable<Entity> EnumerateMembers(World world)
+            {
+                Memberships.RemoveAll(e => !world.EntityIsCurrent(e));
+                return Memberships.Select(e => new Entity(e, world));
+            }
+        }
+
+        private class MembershipComponent<T>
+        {
+            public T MembershipData { get; set; }
+            public EntityId Collection;
+
+            public MembershipComponent(T membershipData)
+            {
+                MembershipData = membershipData;
+            }
         }
     }
 }
