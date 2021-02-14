@@ -10,6 +10,10 @@ namespace TakeSwordNet5
         private Dictionary<Type, int> componentIdsByType = new();
         // Tracks the reason each Type was registered, for more detailed error message.
         private Dictionary<Type, string> registrationReasonByType = new();
+        // Tracks the member-data type for each collection-data component
+        private Dictionary<Type, Type> memberTypesByCollectionType = new();
+        // Tracks the collection-data type for each member-data component
+        private Dictionary<Type, Type> collectionTypesByMemberType = new();
         // Stores all data for all components. The index for this list is the component ID.
         private List<IComponentStorage> componentData = new();
         // Stores factory instances used to construct wrapper types of each component. The index for this list is the component ID.
@@ -250,14 +254,19 @@ namespace TakeSwordNet5
         /// <returns></returns>
         public T? GetComponent<T>(EntityId entityId) where T : class
         {
-            int componentId = GetComponentId<T>();
+            return (T?)GetComponent(typeof(T), entityId);
+        }
+
+        private object? GetComponent(Type componentType, EntityId entityId)
+        {
+            int componentId = GetComponentId(componentType);
             if (!EntityIsCurrent(entityId))
             {
                 return null;
             }
             // Need checks here - index can fail if they plug in
             // an EntityId from another World
-            return (T?)componentData[componentId][entityId.index];
+            return componentData[componentId][entityId.index];
         }
 
         public void RegisterComponent<T>() where T : class
@@ -315,6 +324,11 @@ namespace TakeSwordNet5
         {
             if (!componentIdsByType.TryGetValue(type, out int componentId))
             {
+                string errorMessage = $"Type {type} has not been registered as a component.";
+                if (registrationReasonByType.TryGetValue(type, out string reason))
+                {
+                    errorMessage += $" (It has been registered as a {reason} though.)";
+                }
                 throw new Exception($"No component registered for {type}");
             }
             return componentId;
@@ -438,6 +452,10 @@ namespace TakeSwordNet5
             ReserveType(typeof(TCollection), "membership component");
             RegisterComponent<CollectionComponent<TCollection>>();
             RegisterComponent<MembershipComponent<TMember>>();
+            Type membershipComponentType = typeof(MembershipComponent<TMember>);
+            Type collectionComponentType = typeof(CollectionComponent<TCollection>);
+            collectionTypesByMemberType[membershipComponentType] = collectionComponentType;
+            memberTypesByCollectionType[collectionComponentType] = membershipComponentType;
         }
 
         public (IEnumerable<Entity>, C)? GetCollectionComponent<C>(EntityId entityId)
@@ -453,15 +471,57 @@ namespace TakeSwordNet5
             }
         }
 
-        public void SetCollectionComponent<C>(EntityId entityId, C collectionData)
+        private ICollectionComponent? GetAnonymousCollectionComponent(Type type, EntityId entityId)
         {
-            SetComponent<CollectionComponent<C>>(entityId, new CollectionComponent<C>(collectionData));
+            if (!typeof(ICollectionComponent).IsAssignableFrom(type))
+            {
+                throw new Exception($"The given type {type} does not implement ICollectionComponent.");
+            }
+            return (ICollectionComponent?)GetComponent(type, entityId);
         }
 
-        private class CollectionComponent<T>
+        public void SetCollectionComponent<C>(EntityId entityId, C collectionData)
+        {
+            SetComponent(entityId, new CollectionComponent<C>(collectionData));
+        }
+
+        public void SetMemberComponent<M>(EntityId memberEntityId, M memberData, EntityId collectionEntityId)
+            where M : class
+        {
+            if (!collectionTypesByMemberType
+                .TryGetValue(typeof(MembershipComponent<M>), out Type? collectionComponentType))
+            {
+                throw new Exception($"Type {typeof(M)} is not a membership component.");
+            }
+            CheckEntityIsCurrent(memberEntityId);
+            ICollectionComponent? newCollectionData = GetAnonymousCollectionComponent(
+                collectionComponentType,
+                collectionEntityId
+            );
+            if (newCollectionData is null)
+            {
+                // ??? throw an error. Seems like a dangerous api. Might reconsider this
+            }
+            // Retrieve existing member data from the member entity, if any.
+            MembershipComponent<M>? previousMemberData = GetComponent<MembershipComponent<M>>(memberEntityId);
+            // Set the new member data for the member entity.
+            SetComponent(memberEntityId, new MembershipComponent<M>(memberData));
+            if (collectionEntityId.Equals(previousMemberData?.Collection))
+            {
+                // If the collection entity is the same as the previous one,
+                // no update to any collection's cache of members is needed.
+                return;
+            }
+
+
+
+
+        }
+
+        private class CollectionComponent<T> : ICollectionComponent
         {
             public T CollectionData { get; set; }
-            public List<EntityId> Memberships = new();
+            public List<EntityId> Memberships { get; } = new();
 
             public CollectionComponent(T collectionData)
             {
@@ -475,10 +535,10 @@ namespace TakeSwordNet5
             }
         }
 
-        private class MembershipComponent<T>
+        private class MembershipComponent<T> : IMembershipComponent
         {
             public T MembershipData { get; set; }
-            public EntityId Collection;
+            public EntityId Collection { get; set; }
 
             public MembershipComponent(T membershipData)
             {
