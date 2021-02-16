@@ -41,6 +41,10 @@ namespace TakeSword
                 throw new ComponentException($"Tried to register {type} as a {reason}, " +
                     $"but was already registred as a {conflictingReason}.");
             }
+            else
+            {
+                registrationReasonByType[type] = reason;
+            }
         }
 
         private ParameterKey ParameterKeyByType(Type type)
@@ -276,6 +280,19 @@ namespace TakeSword
             return componentData[componentId][entityId.index];
         }
 
+        public void RegisterComponent<T>(ComponentStorage storageType) where T : class
+        {
+            switch (storageType)
+            {
+                case ComponentStorage.List:
+                    RegisterComponent<T>();
+                    break;
+                case ComponentStorage.Dictionary:
+                    RegisterSparseComponent<T>();
+                    break;
+            }
+        }
+
         public void RegisterComponent<T>() where T : class
         {
             // This list will be full of "value=null, generation=0" at first
@@ -459,7 +476,6 @@ namespace TakeSword
             membershipComponentTypes.Add(typeof(TMember));
             RegisterComponent<MembershipComponent<TMember>>();
             RegisterComponent<CollectionComponent<TMember>>();
-            Type membershipComponentType = typeof(MembershipComponent<TMember>);
         }
 
         public IEnumerable<Entity> GetMembers<M>(EntityId entityId)
@@ -488,6 +504,34 @@ namespace TakeSword
                 return null;
             }
             return Tuple.Create(membershipComponent.MembershipData, membershipComponent.Collection);
+        }
+
+        public void RemoveMembership<M>(EntityId entityId)
+        {
+            // Retrieve our current member data, and save it for later
+            MembershipComponent<M>? previousMemberData = GetComponent<MembershipComponent<M>>(entityId);
+
+            // If we don't have any, there's nothing to do.
+            if (previousMemberData is null)
+            {
+                return;
+            }
+
+            // Otherwise, remove membership data from ourselves
+            RemoveComponent<MembershipComponent<M>>(entityId);
+
+            // Then, retrieve the data for the previous collection.
+            EntityId previousCollectionId = previousMemberData.Collection;
+            CollectionComponent<M>? previousCollectionComponent = GetComponent<CollectionComponent<M>>(previousCollectionId);
+
+            // If it's missing (probably because the entity has been trashed), no action is needed
+            if (previousCollectionComponent is null)
+            {
+                return;
+            }
+
+            // Otherwise, remove this member from it.
+            previousCollectionComponent.Members.Remove(entityId);
         }
 
         public void SetMembership<M>(EntityId memberId, M memberData, EntityId destinationCollectionId)
@@ -547,7 +591,7 @@ namespace TakeSword
             previousCollectionComponent.Members.Remove(memberId);
         }
 
-        private class CollectionComponent<T> : ICollectionComponent
+        private class CollectionComponent<T>
         {
             public List<EntityId> Members { get; } = new();
 

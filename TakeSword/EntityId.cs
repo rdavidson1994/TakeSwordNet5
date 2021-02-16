@@ -24,17 +24,5 @@ namespace TakeSword
         {
             return HashCode.Combine(index, generation);
         }
-
-        public Entity? RetrieveEntity(World world)
-        {
-            if (!world.EntityIsCurrent(this))
-            {
-                return null;
-            }
-            else
-            {
-                return new Entity(this, world);
-            }
-        }
     }
 }
