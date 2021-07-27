@@ -49,6 +49,29 @@ namespace TakeSword
             world.DestroyEntity(Id);
         }
 
+        public bool IsMember<T>(Entity desiredGroup)
+            where T : class
+        {
+            return IsMember(out Entity? actualGroup, out T? _) && desiredGroup.Equals(actualGroup);
+        }
+
+        public bool IsMember<T>([NotNullWhen(true)] out Entity? group)
+            where T : class, new()
+        {
+            return IsMember(out group, out T? _);
+        }
+
+        public Entity? GetParent<T>() where T : class
+        {
+            if (IsMember(out Entity? group, out T? _))
+            {
+                return group;
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         public bool IsMember<T>([NotNullWhen(true)] out Entity? group, [NotNullWhen(true)] out T? membership)
             where T : class
@@ -75,6 +98,12 @@ namespace TakeSword
             world.SetMembership<T>(Id, membership, group.Id);
         }
 
+        public void Enter<T>(Entity group)
+            where T : class, new()
+        {
+            world.SetMembership<T>(Id, new T(), group.Id);
+        }
+
         public void Exit<T>()
         {
             world.RemoveMembership<T>(Id);
@@ -83,6 +112,18 @@ namespace TakeSword
         public IEnumerable<Entity> GetMembers<T>()
         {
             return world.GetMembers<T>(Id);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return obj is Entity entity &&
+                   EqualityComparer<EntityId>.Default.Equals(Id, entity.Id) &&
+                   EqualityComparer<World>.Default.Equals(world, entity.world);
+        }
+
+        public override int GetHashCode()
+        {
+            return System.HashCode.Combine(Id, world);
         }
     }
 }

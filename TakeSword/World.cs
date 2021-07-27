@@ -295,7 +295,7 @@ namespace TakeSword
 
         public void RegisterComponent<T>() where T : class
         {
-            // This list will be full of "value=null, generation=0" at first
+            // This list will be full of nulls at first
             ListComponentStorage entries = new ListComponentStorage(maxEntityCount);
             RegisterComponent<T>(entries);
         }
@@ -374,13 +374,18 @@ namespace TakeSword
         }
 
 
+        public Entity CreateEntity(params object[] components)
+        {
+            return new Entity(CreateEntityId(components), this);
+        }
+
         /// <summary>
         /// create a new entity, with the requested components set.
         /// </summary>
         /// <param name="components">The list of components to set on the entity.
         /// The runtime type of each argument will be used, not "object".</param>
         /// <returns>The id of the newly created entity.</returns>
-        public EntityId CreateEntity(params object[] components)
+        public EntityId CreateEntityId(params object[] components)
         {
             EntityId output;
             // Try to reclaim a vacant index

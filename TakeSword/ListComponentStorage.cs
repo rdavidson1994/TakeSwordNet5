@@ -4,7 +4,7 @@ namespace TakeSword
 {
     public class ListComponentStorage : IComponentStorage
     {
-        private List<object?> innerList;
+        private readonly List<object?> innerList;
 
         public ListComponentStorage(int count)
         {

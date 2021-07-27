@@ -22,12 +22,12 @@ namespace TakeSwordTests
             world = new World();
             world.RegisterCollection<TeamMemberTraits>();
             world.RegisterComponent<HitPoints>();
-            blueTeam = world.CreateEntity();
-            redTeam = world.CreateEntity();
-            alice = world.CreateEntity();
-            bob = world.CreateEntity();
-            charlie = world.CreateEntity();
-            debby = world.CreateEntity();
+            blueTeam = world.CreateEntityId();
+            redTeam = world.CreateEntityId();
+            alice = world.CreateEntityId();
+            bob = world.CreateEntityId();
+            charlie = world.CreateEntityId();
+            debby = world.CreateEntityId();
         }
 
         [Test]

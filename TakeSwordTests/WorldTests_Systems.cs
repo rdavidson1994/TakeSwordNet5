@@ -24,10 +24,10 @@ namespace TakeSwordTests
             world.RegisterComponent<Violence>();
             // Alice and bob have lycanthropy, but bob and charlie can see the moon.
             // Debby is a control.
-            alice = world.CreateEntity(new Lycanthropy(10));
-            bob = world.CreateEntity(new Lycanthropy(20), new FullMoonVisible(20));
-            charlie = world.CreateEntity(new FullMoonVisible(30));
-            debby = world.CreateEntity();
+            alice = world.CreateEntityId(new Lycanthropy(10));
+            bob = world.CreateEntityId(new Lycanthropy(20), new FullMoonVisible(20));
+            charlie = world.CreateEntityId(new FullMoonVisible(30));
+            debby = world.CreateEntityId();
 
         }
 

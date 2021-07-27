@@ -13,7 +13,6 @@ namespace TakeSword
         /// <param name="initialValue"></param>
         /// <returns></returns>
         public object CreateWritable(object initialValue);
-
         public object CreateOptional(object? initialValue);
         public object CreateWritableOptional(object? initialValue);
     }
