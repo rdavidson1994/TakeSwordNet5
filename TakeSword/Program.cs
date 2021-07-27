@@ -62,10 +62,8 @@ namespace TakeSword
             apple.Enter<Location>(place);
 
 
-            GameOutputUpdate update = new();
             OutputEntry description = DescriptionUtilities.GetDescription(place, player);
-            update.SceneUpdates.Add(description);
-            Console.WriteLine(update.AsPlainText());
+            Console.WriteLine(description.AsPlainText());
 
 
             while (true)

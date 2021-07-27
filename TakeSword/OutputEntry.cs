@@ -164,6 +164,13 @@ namespace TakeSword
                 Add(line + "\n");
             }
         }
+
+        public string AsPlainText()
+        {
+            GameOutputUpdate update = new();
+            update.SceneUpdates.Add(this);
+            return update.AsPlainText();
+        }
     }
 
 }
