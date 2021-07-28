@@ -1,14 +1,12 @@
 ﻿using System.Runtime.CompilerServices;
+using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 [assembly: InternalsVisibleTo("TakeSwordTests")]
 
 namespace TakeSword
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text.RegularExpressions;
-
     public class OutputTemplate
     {
         private List<object> entries = new();
