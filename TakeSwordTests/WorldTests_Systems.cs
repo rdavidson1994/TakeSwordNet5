@@ -116,7 +116,5 @@ namespace TakeSwordTests
             world.Run();
             CollectionAssert.AreEqual(new[] { alice }, affectedIds);
         }
-        
-
     }
 }
