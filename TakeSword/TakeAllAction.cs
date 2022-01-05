@@ -6,7 +6,6 @@ namespace TakeSword
 {
     public record TakeAllAction(Entity Actor) : SequenceAction
     {
-
         protected override IEnumerable<IGameAction> GetActions()
         {
             if (!Actor.IsMember<Location>(out Entity? location))

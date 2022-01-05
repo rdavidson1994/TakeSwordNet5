@@ -5,12 +5,10 @@ using static TakeSword.ActionStatus;
 [assembly: InternalsVisibleTo("TakeSwordTests")]
 namespace TakeSword
 {
-    public static class Program
+    public static class WorldSetup
     {
-        public static void Main(string[] args)
+        public static void Apply(World world, out Entity player, out Entity startLocation)
         {
-            World world = new();
-
             // Components
             world.RegisterComponent<Senses>();
             world.RegisterComponent<ItemTraits>();
@@ -22,18 +20,11 @@ namespace TakeSword
             // Collections
             world.RegisterCollection<Location>();
 
-            // Verbs
-            var verbSuite = new VerbSuite<Entity>(VerbUtil.GenerateVerbs());
-
             // Entity creation
-            Entity player = world.CreateEntity(
+            player = world.CreateEntity(
                 new Name("player"),
                 new Visibility(),
                 new Senses()
-            );
-
-            Entity nameless = world.CreateEntity(
-                new Visibility()
             );
 
             Entity sword = world.CreateEntity(
@@ -49,7 +40,7 @@ namespace TakeSword
                 new Visibility()
             );
 
-            Entity place = world.CreateEntity(
+            startLocation = world.CreateEntity(
                 new Name("plains"),
                 new SceneDescription(new()
                 {
@@ -57,12 +48,23 @@ namespace TakeSword
                 })
             );
 
-            player.Enter<Location>(place);
-            sword.Enter<Location>(place);
-            apple.Enter<Location>(place);
+            player.Enter<Location>(startLocation);
+            sword.Enter<Location>(startLocation);
+            apple.Enter<Location>(startLocation);
+        }
+    }
+    public static class Program
+    {
+        public static void Main(string[] args)
+        {
+            // Verbs
+            var verbSuite = new VerbSuite<Entity>(VerbUtil.GenerateVerbs());
+
+            World world = new();
+            WorldSetup.Apply(world, out Entity player, out Entity startLocation);
 
 
-            OutputEntry description = DescriptionUtilities.GetDescription(place, player);
+            OutputEntry description = DescriptionUtilities.GetDescription(startLocation, player);
             Console.WriteLine(description.AsPlainText());
 
 

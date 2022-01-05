@@ -25,6 +25,7 @@ namespace TakeSword
         {
             return new List<IVerb<Entity>>()
             {
+                ZeroTarget(a => new QuitGameCommand(), "quit"),
                 ZeroTarget(a => new DropAllAction(a), "drop all", "put down all", "discard all"),
                 ZeroTarget(a => new TakeAllAction(a), "take all", "get all", "pick up all"),
                 ZeroTarget(a => new InventoryAction(a), "inventory", "i", "items"),
