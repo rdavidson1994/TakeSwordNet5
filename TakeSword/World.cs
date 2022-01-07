@@ -124,7 +124,7 @@ namespace TakeSword
             {
             ParameterKeyByType(typeof(T0))
             };
-            GameSystem system = new GameSystem(permissiveAction, componentIds);
+            GameSystem system = new(permissiveAction, componentIds);
             Systems.Add(system);
         }
         #endregion

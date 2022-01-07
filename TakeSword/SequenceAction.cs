@@ -32,7 +32,7 @@
                 return Success();
             }
 
-            var outcome = action.Execute(dryRun);
+            ActionOutcome outcome = action.Execute(dryRun);
             if (outcome.Status == InProgress || outcome.Status == Failed)
             {
                 return outcome;

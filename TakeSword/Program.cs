@@ -16,15 +16,27 @@ namespace TakeSword
             world.RegisterComponent<Name>();
             world.RegisterComponent<FoodTraits>();
             world.RegisterComponent<SceneDescription>();
+            world.RegisterComponent<Actor>();
 
             // Collections
             world.RegisterCollection<Location>();
 
+            // Systems
+            world.InstallSystem<Actor>((entityId, actor) =>
+            {
+                if (world.RetrieveEntity(entityId) is Entity entity)
+                {
+                    actor.Act(entity);
+                }
+            });
+
+            VerbSuite<Entity> verbSuite = new(VerbUtil.GenerateVerbs());
             // Entity creation
             player = world.CreateEntity(
                 new Name("player"),
                 new Visibility(),
-                new Senses()
+                new Senses(),
+                new Actor(new Player(verbSuite))
             );
 
             Entity sword = world.CreateEntity(
@@ -61,12 +73,14 @@ namespace TakeSword
             var verbSuite = new VerbSuite<Entity>(VerbUtil.GenerateVerbs());
 
             World world = new();
-            WorldSetup.Apply(world, out Entity player, out Entity startLocation);
-
-
-            OutputEntry description = DescriptionUtilities.GetDescription(startLocation, player);
+            WorldSetup.Apply(world, out Entity playerEntity, out Entity startLocation);
+            OutputEntry description = DescriptionUtilities.GetDescription(startLocation, playerEntity);
             Console.WriteLine(description.AsPlainText());
-
+            
+            while (true)
+            {
+                world.Run();
+            }
 
             while (true)
             {
@@ -74,7 +88,7 @@ namespace TakeSword
                 string input = Console.ReadLine()!;
                 ActionOutcome? backupFailure = null;
                 IGameAction? validAction = null;
-                foreach (IGameAction action in verbSuite.GetMatches(player, input))
+                foreach (IGameAction action in verbSuite.GetMatches(playerEntity, input))
                 {
                     ActionOutcome testOutcome = action.Execute(dryRun: true);
                     if (testOutcome.Status == Failed)
