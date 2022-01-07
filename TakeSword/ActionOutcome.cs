@@ -3,8 +3,7 @@
     public record ActionOutcome(
         ActionStatus Status,
         string? Message
-    )
-    {
+    ) {
         private record DummyAction(ActionOutcome Outcome) : IGameAction
         {
             public ActionOutcome Execute(bool dryRun = false)

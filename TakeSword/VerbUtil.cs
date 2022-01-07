@@ -30,11 +30,14 @@ namespace TakeSword
                 ZeroTarget(a => new TakeAllAction(a), "take all", "get all", "pick up all"),
                 ZeroTarget(a => new InventoryAction(a), "inventory", "i", "items"),
                 ZeroTarget(a => new LookAction(a), "look", "examine", "x"),
+
                 OneTarget((a, t) => new DropAction(a, t), "drop", "put down", "discard"),
                 OneTarget((a, t) => new TakeAction(a, t), "take", "get", "pick up"),
                 OneTarget((a, t) => new ConsumeAction(a, t), "consume"),
                 OneTarget((a, t) => new ConsumeAction(a, t, ConsumeMode.Eat), "eat"),
                 OneTarget((a, t) => new ConsumeAction(a, t, ConsumeMode.Drink), "drink"),
+
+
             };
         }
     }
