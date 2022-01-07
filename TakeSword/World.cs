@@ -4,13 +4,6 @@ using System.Linq;
 
 namespace TakeSword
 {
-    public class ComponentException : Exception
-    {
-        internal ComponentException(string message) : base(message)
-        {
-
-        }
-    }
     public class World
     {
         // Tracks the relationship between types and the component ID/index assigned to that type.
