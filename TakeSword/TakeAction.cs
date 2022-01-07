@@ -3,6 +3,27 @@ using static TakeSword.ActionOutcome;
 
 namespace TakeSword
 {
+    public record HitAction(Entity Actor, Entity Weapon, Entity Victim) : IGameAction
+    {
+        public ActionOutcome Execute(bool dryRun = false)
+        {
+            if (!Location.DoesMatch(Actor, Victim))
+                return Failure("the target is not present");
+
+            if (dryRun)
+            {
+                return Success();
+            }
+
+            var health = Victim.Get<Health>();
+            if (health == null)
+                return Failure("the target takes no damange from your attack");
+            
+            Victim.Set(new Health(health - 10));
+            return Success();
+            
+        }
+    }
     public record TakeAction(Entity Actor, Entity Target) : IGameAction
     {
         public ActionOutcome Execute(bool dryRun = false)

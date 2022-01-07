@@ -15,6 +15,7 @@ namespace TakeSword
             world.RegisterComponent<FoodTraits>();
             world.RegisterComponent<SceneDescription>();
             world.RegisterComponent<Actor>();
+            world.RegisterComponent<Health>();
 
             // Collections
             world.RegisterCollection<Location>();
@@ -34,7 +35,8 @@ namespace TakeSword
                 new Name("player"),
                 new Visibility(),
                 new Senses(),
-                new Actor(new Player(verbSuite))
+                new Actor(new Player(verbSuite)),
+                new Health(100)
             );
 
             var weirdo = world.CreateEntity(
