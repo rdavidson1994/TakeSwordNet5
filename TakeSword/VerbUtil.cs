@@ -36,7 +36,7 @@ namespace TakeSword
                 OneTarget((a, t) => new ConsumeAction(a, t), "consume"),
                 OneTarget((a, t) => new ConsumeAction(a, t, ConsumeMode.Eat), "eat"),
                 OneTarget((a, t) => new ConsumeAction(a, t, ConsumeMode.Drink), "drink"),
-
+                OneTarget((a, t) => new HitAction(a, t), "hit", "strike", "attack"),
 
             };
         }

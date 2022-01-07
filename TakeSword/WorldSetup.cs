@@ -7,15 +7,22 @@ namespace TakeSword
     {
         public static void Apply(World world, out Entity player, out Entity startLocation)
         {
+            void register<T>() where T : class
+            {
+                world.RegisterComponent<T>();
+            }
             // Components
-            world.RegisterComponent<Senses>();
-            world.RegisterComponent<ItemTraits>();
-            world.RegisterComponent<Visibility>();
-            world.RegisterComponent<Name>();
-            world.RegisterComponent<FoodTraits>();
-            world.RegisterComponent<SceneDescription>();
-            world.RegisterComponent<Actor>();
-            world.RegisterComponent<Health>();
+            register<Senses>();
+            register<ItemTraits>();
+            register<Visibility>();
+            register<Name>();
+            register<FoodTraits>();
+            register<SceneDescription>();
+            register<Actor>();
+            register<Health>();
+            register<AttackAbility>();
+
+
 
             // Collections
             world.RegisterCollection<Location>();
@@ -36,13 +43,18 @@ namespace TakeSword
                 new Visibility(),
                 new Senses(),
                 new Actor(new Player(verbSuite)),
-                new Health(100)
+                new Health(100),
+                new AttackAbility(
+                    Attack: new(Damage: 10, DamageType.Blunt),
+                    Name: "punch"
+                )
             );
 
             var weirdo = world.CreateEntity(
                 new Name("weirdo"),
                 new Senses(),
                 new Visibility(),
+                new Health(50),
                 new Actor(new Script((self) =>
                 {
                     System.Console.WriteLine("WEIRDO - doing the thing!");
