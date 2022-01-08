@@ -24,5 +24,15 @@ namespace TakeSword
         {
             return HashCode.Combine(index, generation);
         }
+
+        public static bool operator ==(EntityId left, EntityId right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(EntityId left, EntityId right)
+        {
+            return !(left == right);
+        }
     }
 }
