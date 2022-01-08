@@ -9,9 +9,9 @@ namespace TakeSword
             world.InstallSystem((EntityId self, Edit<Health> health, Edit<Actor> actor, Edit<Name> name) => {
                 if (health.Value > 0)
                     return;
-
-                Console.WriteLine($"{name.Value} has died.");
-                name.Write(new($"corpse of {name.Value}"));
+                string nameString = name.Value;
+                Console.WriteLine($"{nameString} has died.");
+                name.Write(new($"corpse of {nameString}"));
                 health.Destroy();
                 actor.Destroy();
             });

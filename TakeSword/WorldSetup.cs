@@ -28,14 +28,8 @@ namespace TakeSword
             world.RegisterCollection<Location>();
 
             // Systems
-            world.InstallSystem<Actor>((entityId, actor) =>
-            {
-                if (world.RetrieveEntity(entityId) is Entity entity)
-                {
-                    actor.Act(entity);
-                }
-            });
 
+            CharacterActions.Install(world);
             Death.Install(world);
 
             // Entity creation
