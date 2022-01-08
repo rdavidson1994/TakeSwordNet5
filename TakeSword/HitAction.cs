@@ -26,7 +26,7 @@ namespace TakeSword
             
 
             Victim.Set(health with { Amount = health - damage });
-            return Success($"the victim takes {damage} damage.");
+            return Success($"the victim takes {damage} damage. New health is {health - damage}");
         }
     }
 }

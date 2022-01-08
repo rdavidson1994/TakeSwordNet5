@@ -36,8 +36,10 @@ namespace TakeSword
                 }
             });
 
-            VerbSuite<Entity> verbSuite = new(VerbUtil.GenerateVerbs());
+            Death.Install(world);
+
             // Entity creation
+            VerbSuite<Entity> verbSuite = new(VerbUtil.GenerateVerbs());
             player = world.CreateEntity(
                 new Name("player"),
                 new Visibility(),

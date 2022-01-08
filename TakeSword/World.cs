@@ -104,6 +104,29 @@ namespace TakeSword
             Systems.Add(system);
         }
 
+        public void InstallSystem<T0, T1, T2, T3>(Action<EntityId, T0, T1, T2, T3> effect)
+        {
+            Action<EntityId, object[]> permissiveAction = (id, args) =>
+            {
+                effect(
+                    id
+                    , (T0)args[0]
+                    , (T1)args[1]
+                    , (T2)args[2]
+                    , (T3)args[3]
+                );
+            };
+            ParameterKey[] parameterKeys = new ParameterKey[]
+            {
+            ParameterKeyByType(typeof(T0))
+            ,ParameterKeyByType(typeof(T1))
+            ,ParameterKeyByType(typeof(T2))
+            ,ParameterKeyByType(typeof(T3))
+            };
+            GameSystem system = new GameSystem(permissiveAction, parameterKeys);
+            Systems.Add(system);
+        }
+
         public void InstallSystem<T0>(Action<EntityId, T0> effect)
         {
             Action<EntityId, object[]> permissiveAction = (id, args) =>
