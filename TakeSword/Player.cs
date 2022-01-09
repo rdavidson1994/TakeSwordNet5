@@ -3,10 +3,6 @@ using static TakeSword.ActionStatus;
 
 namespace TakeSword
 {
-    public record CompletedAction(
-        IGameAction Action,
-        ActionOutcome Outcome
-    );
     public class Player : IActor
     {
         private VerbSuite<Entity> verbSuite;

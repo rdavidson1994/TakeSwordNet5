@@ -7,11 +7,11 @@ namespace TakeSword
     {
         public static void Apply(World world, out Entity player, out Entity startLocation)
         {
+            // Component registration
             void register<T>() where T : class
             {
                 world.RegisterComponent<T>();
             }
-            // Components
             register<Senses>();
             register<ItemTraits>();
             register<Visibility>();
@@ -21,14 +21,12 @@ namespace TakeSword
             register<Actor>();
             register<Health>();
             register<NaturalAttack>();
-
-
+            register<WeaponTraits>();
 
             // Collections
             world.RegisterCollection<Location>();
 
             // Systems
-
             CharacterActions.Install(world);
             Death.Install(world);
 
@@ -61,7 +59,8 @@ namespace TakeSword
             Entity sword = world.CreateEntity(
                 new Name("iron sword"),
                 new ItemTraits(200),
-                new Visibility()
+                new Visibility(),
+                new WeaponTraits(25, DamageType.Sharp)
             );
 
             Entity apple = world.CreateEntity(

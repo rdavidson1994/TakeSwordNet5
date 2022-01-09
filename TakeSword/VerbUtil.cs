@@ -21,6 +21,11 @@ namespace TakeSword
             return new ZeroTargetVerb<Entity>(actionFactory, synonyms);
         }
 
+        static SingleTargetVerbWithTool<Entity> OneTargetWithTool(Func<Entity, Entity, Entity, IGameAction> actionFactory, params string[] synonyms)
+        {
+            return new SingleTargetVerbWithTool<Entity>(LookupFunction, actionFactory, synonyms);
+        }
+
         public static IReadOnlyList<IVerb<Entity>> GenerateVerbs()
         {
             return new List<IVerb<Entity>>()
@@ -31,6 +36,8 @@ namespace TakeSword
                 ZeroTarget(a => new InventoryAction(a), "inventory", "i", "items"),
                 ZeroTarget(a => new LookAction(a), "look", "examine", "x"),
                 ZeroTarget(a => new WaitAction(a), "wait"),
+
+                OneTargetWithTool((actor, target, weapon) => new HitAction(actor, target, weapon), "hit", "strike", "attack"),
 
                 OneTarget((a, t) => new DropAction(a, t), "drop", "put down", "discard"),
                 OneTarget((a, t) => new TakeAction(a, t), "take", "get", "pick up"),
