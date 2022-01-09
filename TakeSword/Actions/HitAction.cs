@@ -9,7 +9,7 @@ namespace TakeSword
             if (!Location.DoesMatch(Actor, Victim))
                 return Failure("the target is not present");
 
-            var attackAbility = Actor.Get<AttackAbility>();
+            var attackAbility = Actor.Get<NaturalAttack>();
             if (attackAbility == null)
                 return Failure("you have no natural methods of attacking.");
 

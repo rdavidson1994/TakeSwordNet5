@@ -1,6 +1,6 @@
 ﻿namespace TakeSword
 {
-    public record AttackAbility(
+    public record NaturalAttack(
         WeaponTraits Attack,
         string Name
     );

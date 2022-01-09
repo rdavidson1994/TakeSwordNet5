@@ -20,7 +20,7 @@ namespace TakeSword
             register<SceneDescription>();
             register<Actor>();
             register<Health>();
-            register<AttackAbility>();
+            register<NaturalAttack>();
 
 
 
@@ -40,7 +40,7 @@ namespace TakeSword
                 new Senses(),
                 new Actor(new Player(verbSuite)),
                 new Health(100),
-                new AttackAbility(
+                new NaturalAttack(
                     Attack: new(Damage: 10, DamageType.Blunt),
                     Name: "punch"
                 )
