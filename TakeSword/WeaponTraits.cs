@@ -1,6 +1,6 @@
 ﻿namespace TakeSword
 {
-    public record AttackTraits(
+    public record WeaponTraits(
         int Damage,
         DamageType DamageType
     );

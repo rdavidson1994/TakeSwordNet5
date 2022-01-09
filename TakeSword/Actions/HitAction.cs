@@ -17,7 +17,7 @@ namespace TakeSword
             if (dryRun)
                 return Success();
 
-            (AttackTraits attackTraits, _) = attackAbility;
+            (WeaponTraits attackTraits, _) = attackAbility;
             (int damage, _) = attackTraits;
             var health = Victim.Get<Health>();
 
