@@ -32,11 +32,12 @@ namespace TakeSword
 
             // Entity creation
             VerbSuite<Entity> verbSuite = new(VerbUtil.GenerateVerbs());
+            IActor playerAI = new Player(verbSuite, new ConsolePlayerIO());
             player = world.CreateEntity(
                 new Name("player"),
                 new Visibility(),
                 new Senses(),
-                new Actor(new Player(verbSuite)),
+                new Actor(playerAI),
                 new Health(100),
                 new NaturalAttack(
                     Attack: new(Damage: 10, DamageType.Blunt),

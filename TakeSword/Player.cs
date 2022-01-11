@@ -5,12 +5,15 @@ namespace TakeSword
 {
     public class Player : IActor
     {
-        private VerbSuite<Entity> verbSuite;
+        private readonly VerbSuite<Entity> verbSuite;
+        private readonly IPlayerIO io;
+
         private CompletedAction? lastCompletedAction = null;
 
-        public Player(VerbSuite<Entity> verbSuite)
+        public Player(VerbSuite<Entity> verbSuite, IPlayerIO io)
         {
             this.verbSuite = verbSuite;
+            this.io = io;
         }
 
         public ActionOutcome Act(Entity self)
@@ -23,7 +26,7 @@ namespace TakeSword
                 {
                     if (!string.IsNullOrEmpty(previousOutcome.Message))
                     {
-                        Console.WriteLine($"({previousOutcome.Message})...");
+                        io.WriteLine($"({previousOutcome.Message})...");
                     }
                     // Repeate (i.e. continue) the action if it is still in progress
                     ActionOutcome nextOutcome = previousAction.Execute();
@@ -35,14 +38,14 @@ namespace TakeSword
                 {
                     if (!string.IsNullOrEmpty(previousOutcome.Message))
                     {
-                        Console.WriteLine($"{previousOutcome.Message}");
+                        io.WriteLine($"{previousOutcome.Message}");
                     }
                 }
             }
             while (true)
             {
-                Console.Write(">");
-                string input = Console.ReadLine()!;
+                io.Write(">");
+                string input = io.ReadLine();
                 ActionOutcome? backupFailure = null;
                 IGameAction? validAction = null;
                 foreach (IGameAction action in verbSuite.GetMatches(self, input))
