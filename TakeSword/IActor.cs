@@ -1,8 +1,8 @@
 ﻿namespace TakeSword
 {
-    public interface IActor
+    public interface IActor<T>
     {
-        ActionOutcome Act(Entity self);
+        ActionOutcome Act(T self);
     }
 }
 

@@ -3,20 +3,20 @@ using static TakeSword.ActionStatus;
 
 namespace TakeSword
 {
-    public class Player : IActor
+    public class Player<T> : IActor<T>
     {
-        private readonly VerbSuite<Entity> verbSuite;
+        private readonly VerbSuite<T> verbSuite;
         private readonly IPlayerIO io;
 
         private CompletedAction? lastCompletedAction = null;
 
-        public Player(VerbSuite<Entity> verbSuite, IPlayerIO io)
+        public Player(VerbSuite<T> verbSuite, IPlayerIO io)
         {
             this.verbSuite = verbSuite;
             this.io = io;
         }
 
-        public ActionOutcome Act(Entity self)
+        public ActionOutcome Act(T self)
         {
             if (this.lastCompletedAction != null)
             {

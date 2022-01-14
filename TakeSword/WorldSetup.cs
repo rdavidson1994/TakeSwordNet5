@@ -18,7 +18,7 @@ namespace TakeSword
             register<Name>();
             register<FoodTraits>();
             register<SceneDescription>();
-            register<Actor>();
+            register<Actor<Entity>>();
             register<Health>();
             register<NaturalAttack>();
             register<WeaponTraits>();
@@ -32,12 +32,12 @@ namespace TakeSword
 
             // Entity creation
             VerbSuite<Entity> verbSuite = new(VerbUtil.GenerateVerbs());
-            IActor playerAI = new Player(verbSuite, new ConsolePlayerIO());
+            IActor<Entity> playerAI = new Player<Entity>(verbSuite, new ConsolePlayerIO());
             player = world.CreateEntity(
                 new Name("player"),
                 new Visibility(),
                 new Senses(),
-                new Actor(playerAI),
+                new Actor<Entity>(playerAI),
                 new Health(100),
                 new NaturalAttack(
                     Attack: new(Damage: 10, DamageType.Blunt),
@@ -50,7 +50,7 @@ namespace TakeSword
                 new Senses(),
                 new Visibility(),
                 new Health(50),
-                new Actor(new Script((self) =>
+                new Actor<Entity>(new Script((self) =>
                 {
                     System.Console.WriteLine("WEIRDO - doing the thing!");
                     return ActionOutcome.Progress("Doing the thing!");

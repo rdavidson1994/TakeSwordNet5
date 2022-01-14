@@ -4,7 +4,7 @@
     {
         public static void Install(World world)
         {
-            world.InstallSystem<Actor>((entityId, actor) =>
+            world.InstallSystem<Actor<Entity>>((entityId, actor) =>
             {
                 if (world.RetrieveEntity(entityId) is Entity entity)
                 {

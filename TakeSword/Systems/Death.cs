@@ -6,7 +6,7 @@ namespace TakeSword
     {
         public static void Install(World world)
         {
-            world.InstallSystem((EntityId self, Edit<Health> health, Edit<Actor> actor, Edit<Name> name) => {
+            world.InstallSystem((EntityId self, Edit<Health> health, Edit<Actor<Entity>> actor, Edit<Name> name) => {
                 if (health.Value > 0)
                     return;
                 string nameString = name.Value;

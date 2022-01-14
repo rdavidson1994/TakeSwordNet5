@@ -1,15 +1,15 @@
 ﻿namespace TakeSword
 {
-    public class Actor : IActor
+    public class Actor<T> : IActor<T>
     {
-        private IActor implementor;
+        private IActor<T> implementor;
 
-        public Actor(IActor implementor)
+        public Actor(IActor<T> implementor)
         {
             this.implementor = implementor;
         }
 
-        public ActionOutcome Act(Entity self)
+        public ActionOutcome Act(T self)
         {
             return implementor.Act(self);
         }
