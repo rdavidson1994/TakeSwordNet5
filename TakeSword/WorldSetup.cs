@@ -45,18 +45,6 @@ namespace TakeSword
                 )
             );
 
-            var weirdo = world.CreateEntity(
-                new Name("weirdo"),
-                new Senses(),
-                new Visibility(),
-                new Health(50),
-                new Actor<Entity>(new Script((self) =>
-                {
-                    System.Console.WriteLine("WEIRDO - doing the thing!");
-                    return ActionOutcome.Progress("Doing the thing!");
-                }))
-            );
-
             Entity sword = world.CreateEntity(
                 new Name("iron sword"),
                 new ItemTraits(200),
@@ -82,7 +70,6 @@ namespace TakeSword
             player.Enter<Location>(startLocation);
             sword.Enter<Location>(startLocation);
             apple.Enter<Location>(startLocation);
-            weirdo.Enter<Location>(startLocation);
         }
     }
 }
