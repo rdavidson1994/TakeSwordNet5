@@ -10,7 +10,12 @@ namespace TakeSword
     {
         public ActionOutcome Execute(bool dryRun = false)
         {
-            // Do nothing - placeholder
+            // Todo - make sure you're outside
+            if (dryRun)
+            {
+                return ActionOutcome.Success();
+            }
+            
             return ActionOutcome.Success();
         }
     }

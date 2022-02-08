@@ -2,16 +2,15 @@
 
 namespace TakeSword
 {
-    public record LookAction(Entity Actor) : IGameAction
+
+    public record LookAction(Entity Actor) : IInfoAction
     {
-        public ActionOutcome Execute(bool dryRun = false)
+        public string Output()
         {
-            if (dryRun)
-                return Success();
             if (Actor.GetParent<Location>() is not Entity location)
-                return Failure("you do not have a physical location to examine.");
+                return "you do not have a physical location to examine.";
             OutputEntry description = DescriptionUtilities.GetDescription(location, Actor);
-            return Success(description.AsPlainText());
+            return description.AsPlainText();
         }
     }
 }
