@@ -29,6 +29,8 @@ namespace TakeSword
             // Systems
             CharacterActions.Install(world);
             Death.Install(world);
+            Motion.SystemInstall(world);
+            
 
             // Entity creation
             VerbSuite<Entity> verbSuite = new(VerbUtil.GenerateVerbs());
