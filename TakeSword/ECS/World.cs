@@ -123,7 +123,7 @@ namespace TakeSword
             ,ParameterKeyByType(typeof(T2))
             ,ParameterKeyByType(typeof(T3))
             };
-            GameSystem system = new GameSystem(permissiveAction, parameterKeys);
+            GameSystem system = new(permissiveAction, parameterKeys);
             Systems.Add(system);
         }
 
@@ -369,7 +369,7 @@ namespace TakeSword
                 {
                     errorMessage += $" (It has been registered as a {reason} though.)";
                 }
-                throw new ComponentException($"No component registered for {type}");
+                throw new ComponentException(errorMessage);
             }
             return componentId;
         }
