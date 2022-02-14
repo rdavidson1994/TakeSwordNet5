@@ -2,19 +2,15 @@
 {
     using System.Linq;
     using System.Text;
-    using static ActionOutcome;
 
-    public record InventoryAction(Entity Actor) : IGameAction
+    public record InventoryAction(Entity Actor) : IInfoAction
     {
-        public ActionOutcome Execute(bool dryRun = false)
+        public string Output()
         {
-            if (dryRun)
-                return Success();
-
             var items = Actor.GetMembers<Location>().ToList();
             if (items.Count == 0)
             {
-                return Success("You aren't carrying anything.");
+                return "You aren't carrying anything.";
             }
 
             var output = new StringBuilder();
@@ -24,7 +20,7 @@
                 output.AppendLine($"* {name}");
             }
 
-            return Success(output.ToString());
+            return output.ToString();
         }
     }
 }

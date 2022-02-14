@@ -36,6 +36,7 @@ namespace TakeSword
                 ZeroTarget(a => new InventoryAction(a), "inventory", "i", "items"),
                 ZeroTarget(a => new LookAction(a), "look", "examine", "x"),
                 ZeroTarget(a => new WaitAction(a), "wait"),
+                ZeroTarget(a => new CampAction(a), "camp", "make camp"),
 
                 OneTargetWithTool((actor, target, weapon) => new HitAction(actor, target, weapon), "hit", "strike", "attack"),
 
