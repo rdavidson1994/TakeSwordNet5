@@ -63,6 +63,23 @@ namespace TakeSword
                 sceneDescription.AddLine("There are no items here");
             }
 
+            if (scene.Has<RoomExits>(out var roomExits))
+            {
+                bool printedHeader = false;
+                foreach (Direction direction in DirectionExtensions.EnumerateDirections())
+                {
+                    if (roomExits.TryGetValue(direction, out var _destinationRoomId))
+                    {
+                        if (!printedHeader)
+                        {
+                            sceneDescription.AddLine("Exits:");
+                            printedHeader = true;
+                        }
+                        sceneDescription.AddLine($"- Exit facing {direction.Name()}"); 
+                    }
+                }
+            }
+
             return sceneDescription.Render(resolver);
         }
     }

@@ -22,6 +22,8 @@ namespace TakeSword
             register<Health>();
             register<NaturalAttack>();
             register<WeaponTraits>();
+            register<RoomExits>();
+            register<Motion>();
 
             // Collections
             world.RegisterCollection<Location>();
@@ -73,13 +75,29 @@ namespace TakeSword
                 new Visibility()
             );
 
+            var secondLocation = world.CreateEntity(
+                new Name("shady alley"),
+                new SceneDescription(new()
+                {
+                    "You are in a shady back alley."
+                })
+            );
+
             startLocation = world.CreateEntity(
                 new Name("plains"),
                 new SceneDescription(new()
                 {
                     "You stand among tall grasses in a field of gently rolling hills."
+                }),
+                new RoomExits(new() {
+                    [Direction.North] = secondLocation.Id
                 })
             );
+
+            secondLocation.Set(new RoomExits(new ()
+            {
+                [Direction.South] = startLocation.Id
+            }));
 
             player.Enter<Location>(startLocation);
             sword.Enter<Location>(startLocation);
