@@ -28,7 +28,7 @@ namespace TakeSword
                     {
                         io.WriteLine($"({previousOutcome.Message})...");
                     }
-                    // Repeate (i.e. continue) the action if it is still in progress
+                    // Repeat (i.e. continue) the action if it is still in progress
                     ActionOutcome nextOutcome = previousAction.Execute();
                     this.lastCompletedAction = new CompletedAction(previousAction, nextOutcome);
                     return nextOutcome;
@@ -74,7 +74,6 @@ namespace TakeSword
                     {
                         Console.WriteLine(backupFailure.Message);
                     }
-
                     continue;
                 }
 

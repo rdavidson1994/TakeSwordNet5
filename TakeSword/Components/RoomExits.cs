@@ -11,7 +11,6 @@ namespace TakeSword
     public class RoomExits : IDictionary<Direction, EntityId>
     {
         private readonly Dictionary<Direction, EntityId> data;
-
         public RoomExits(Dictionary<Direction, EntityId> data)
         {
             this.data = data;
