@@ -32,7 +32,14 @@ namespace TakeSword
             CharacterActions.Install(world);
             Death.Install(world);
             Motion.SystemInstall(world);
-            
+            world.InstallSystem<Name>((e, name) =>
+            {
+                if (name.Value == "player")
+                {
+                    System.Console.WriteLine("Tick...");
+                }
+            });
+
 
             // Entity creation
             VerbSuite<Entity> verbSuite = new(VerbUtil.GenerateVerbs());
@@ -77,12 +84,13 @@ namespace TakeSword
                 {
                     "You stand among tall grasses in a field of gently rolling hills."
                 }),
-                new RoomExits(new() {
+                new RoomExits(new()
+                {
                     [Direction.North] = secondLocation.Id
                 })
             );
 
-            secondLocation.Set(new RoomExits(new ()
+            secondLocation.Set(new RoomExits(new()
             {
                 [Direction.South] = startLocation.Id
             }));

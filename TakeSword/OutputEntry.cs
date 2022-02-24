@@ -136,7 +136,7 @@ namespace TakeSword
             Content.Add(span);
         }
         public OutputEntry this[string text]
-        { 
+        {
             get
             {
                 Add(text);
@@ -157,7 +157,7 @@ namespace TakeSword
 
         public void AddLines(List<string> lines)
         {
-            foreach(string line in lines)
+            foreach (string line in lines)
             {
                 Add(line + "\n");
             }

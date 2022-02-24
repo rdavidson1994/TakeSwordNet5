@@ -25,7 +25,7 @@ namespace TakeSword
 
         public bool WasDestroyed => Destroyed;
     }
-    
+
     public class Create<T> : Edit<T>, IOptional
     {
         public Create(T initialValue) : base(initialValue)

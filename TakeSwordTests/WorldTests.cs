@@ -20,7 +20,7 @@ namespace TakeSwordTests
         [Test]
         public void CreateEntity_UnregistedComponent_ThrowsException()
         {
-            Assert.Throws<ComponentException>(()=>world.CreateEntityId(new FooComponent()));
+            Assert.Throws<ComponentException>(() => world.CreateEntityId(new FooComponent()));
         }
 
         [Test]

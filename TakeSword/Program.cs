@@ -12,7 +12,7 @@ namespace TakeSword
             WorldSetup.Apply(world, out Entity playerEntity, out Entity startLocation);
             OutputEntry description = DescriptionUtilities.GetDescription(startLocation, playerEntity);
             Console.WriteLine(description.AsPlainText());
-            
+
             while (true)
             {
                 world.Run();

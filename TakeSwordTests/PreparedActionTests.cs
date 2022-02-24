@@ -10,7 +10,7 @@ namespace TakeSwordTests
 {
     public class PreparedActionTests
     {
-        private class MockPreparedAction : PreparedAction
+        private record MockPreparedAction : PreparedAction
         {
             private ActionOutcome scriptedDryRunOutcome;
             private ActionOutcome scriptedActualOutcome;

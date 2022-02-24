@@ -75,7 +75,7 @@ namespace TakeSword
                             sceneDescription.AddLine("Exits:");
                             printedHeader = true;
                         }
-                        sceneDescription.AddLine($"- Exit facing {direction.Name()}"); 
+                        sceneDescription.AddLine($"- Exit facing {direction.Name()}");
                     }
                 }
             }

@@ -58,7 +58,7 @@ namespace TakeSwordTests
             return output;
         }
 
-        
+
 
         public PlayerTests()
         {
@@ -81,7 +81,7 @@ namespace TakeSwordTests
             }));
 
             ActionOutcome outcome = player.Act(PLAYER);
-            Assert.AreEqual("entity#1.meditate()", outcome.Message);                    
+            Assert.AreEqual("entity#1.meditate()", outcome.Message);
         }
     }
 }

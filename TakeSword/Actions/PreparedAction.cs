@@ -1,9 +1,9 @@
 ﻿namespace TakeSword
 {
-    public abstract class PreparedAction : IGameAction
+    public abstract record PreparedAction : IGameAction
     {
         private uint preparationCompleted = 0;
-        protected virtual uint PreparationNeeded => 0;
+        protected abstract uint PreparationNeeded { get; }
         public ActionOutcome Execute(bool dryRun = false)
         {
             if (dryRun)

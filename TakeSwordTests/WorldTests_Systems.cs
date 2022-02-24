@@ -38,7 +38,8 @@ namespace TakeSwordTests
                 EntityId id,
                 Lycanthropy lycanthropy,
                 FullMoonVisible fullMoon
-            ) => {
+            ) =>
+            {
                 // Only bob should enter this system
                 Assert.AreEqual(bob, id);
                 Assert.Pass();
@@ -57,7 +58,8 @@ namespace TakeSwordTests
                 Lycanthropy lycanthropy,
                 FullMoonVisible fullMoon,
                 Create<Violence> violence
-            ) => {
+            ) =>
+            {
                 // Only bob should enter this system
                 Assert.AreEqual(bob, id);
                 violence.Write(new(9001));
@@ -74,7 +76,8 @@ namespace TakeSwordTests
                 EntityId id,
                 Optional<Lycanthropy> lycanthropy,
                 FullMoonVisible fullMoon
-            ) => {
+            ) =>
+            {
                 results.Add(id, (lycanthropy.Value?.Severity, fullMoon.Brightness));
             });
             world.Run();
@@ -93,7 +96,8 @@ namespace TakeSwordTests
                 EntityId id,
                 Edit<Lycanthropy> lycanthropy,
                 FullMoonVisible fullMoon
-            ) => {
+            ) =>
+            {
                 Assert.AreEqual(bob, id);
                 lycanthropy.Write(lycanthropy.Value with { Severity = 100 });
             });

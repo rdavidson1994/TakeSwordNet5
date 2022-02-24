@@ -32,7 +32,7 @@ namespace TakeSword
         public static implicit operator FoodTraits(int n) => new FoodTraits(n);
     }
 
-    public abstract record Countable(int Amount): ICountable
+    public abstract record Countable(int Amount) : ICountable
     {
         public static implicit operator int(Countable n) => n.Amount;
         public T Add<T>(int delta) where T : Countable

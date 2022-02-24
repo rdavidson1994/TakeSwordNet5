@@ -101,7 +101,8 @@ namespace TakeSword
             AddOption("examine");
             if (subject.Has<ItemTraits>())
             {
-                if (!subject.IsMember<Location>(viewer)) {
+                if (!subject.IsMember<Location>(viewer))
+                {
                     AddOption("take");
                 }
                 else

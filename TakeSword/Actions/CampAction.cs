@@ -6,16 +6,18 @@ using System.Threading.Tasks;
 
 namespace TakeSword
 {
-    public record CampAction(Entity Actor) : IGameAction
+    public record CampAction(Entity Actor) : PreparedAction
     {
-        public ActionOutcome Execute(bool dryRun = false)
+        protected override uint PreparationNeeded => 10;
+
+        protected override ActionOutcome GetCompletionOutcome(bool dryRun = false)
         {
             // Todo - make sure you're outside
             if (dryRun)
             {
                 return ActionOutcome.Success();
             }
-            
+
             return ActionOutcome.Success();
         }
     }

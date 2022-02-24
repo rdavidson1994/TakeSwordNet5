@@ -7,7 +7,7 @@
         {
             return new Edit<T>(initialValue);
         }
-        
+
         public Optional<T> CreateOptional(T? value)
         {
             return new Optional<T>(value);

@@ -150,8 +150,8 @@ namespace TakeSwordTests
             world.SetMembership(alice, new TeamMemberTraits(10), redTeam);
             world.SetMembership(bob, new TeamMemberTraits(20), redTeam);
             world.SetMembership(alice, new TeamMemberTraits(30), blueTeam);
-            var redMembers = world.GetMembers<TeamMemberTraits>(redTeam).Select(x=>x.Id);
-            var blueMembers = world.GetMembers<TeamMemberTraits>(blueTeam).Select(x=>x.Id);
+            var redMembers = world.GetMembers<TeamMemberTraits>(redTeam).Select(x => x.Id);
+            var blueMembers = world.GetMembers<TeamMemberTraits>(blueTeam).Select(x => x.Id);
             CollectionAssert.AreEqual(new[] { bob }, redMembers);
             CollectionAssert.AreEqual(new[] { alice }, blueMembers);
         }
