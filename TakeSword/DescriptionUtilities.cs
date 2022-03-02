@@ -68,7 +68,7 @@ namespace TakeSword
                 bool printedHeader = false;
                 foreach (Direction direction in DirectionExtensions.EnumerateDirections())
                 {
-                    if (roomExits.TryGetValue(direction, out var _destinationRoomId))
+                    if (roomExits.Get(direction).HasValue)
                     {
                         if (!printedHeader)
                         {

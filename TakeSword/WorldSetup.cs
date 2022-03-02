@@ -84,16 +84,16 @@ namespace TakeSword
                 {
                     "You stand among tall grasses in a field of gently rolling hills."
                 }),
-                new RoomExits(new()
+                new RoomExits() with
                 {
-                    [Direction.North] = secondLocation.Id
-                })
+                    North = secondLocation.Id
+                }
             );
 
-            secondLocation.Set(new RoomExits(new()
+            secondLocation.Set(new RoomExits() with
             {
-                [Direction.South] = startLocation.Id
-            }));
+                South = secondLocation.Id
+            });
 
             player.Enter<Location>(startLocation);
             sword.Enter<Location>(startLocation);
