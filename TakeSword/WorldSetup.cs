@@ -92,7 +92,7 @@ namespace TakeSword
 
             secondLocation.Set(new RoomExits() with
             {
-                South = secondLocation.Id
+                South = startLocation.Id
             });
 
             player.Enter<Location>(startLocation);
