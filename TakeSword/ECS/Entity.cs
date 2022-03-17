@@ -6,7 +6,7 @@ namespace TakeSword
     public class Entity
     {
         public EntityId Id { get; }
-        private IWorld world;
+        private readonly IWorld world;
 
 
         internal Entity(EntityId entityId, IWorld world)

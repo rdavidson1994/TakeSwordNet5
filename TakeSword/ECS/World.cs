@@ -8,25 +8,25 @@ namespace TakeSword
     public class World : IWorld
     {
         // Tracks the relationship between types and the component ID/index assigned to that type.
-        private Dictionary<Type, int> componentIdsByType = new();
+        private readonly Dictionary<Type, int> componentIdsByType = new();
         // Tracks the reason each Type was registered, for more detailed error message.
-        private Dictionary<Type, string> registrationReasonByType = new();
+        private readonly Dictionary<Type, string> registrationReasonByType = new();
         // Tracks which types have been registered as collection membership components
-        private HashSet<Type> membershipComponentTypes = new();
+        private readonly HashSet<Type> membershipComponentTypes = new();
         // Stores all data for all components.
         // The index for this list is the component ID.
-        private List<IComponentStorage> componentData = new();
+        private readonly List<IComponentStorage> componentData = new();
         // Stores factory instances used to construct wrapper types of each component. 
         // The index for this list is the component ID.
-        private List<IWrapperFactory> writeWrapperFactories = new();
+        private readonly List<IWrapperFactory> writeWrapperFactories = new();
         // The largest number of entities the world can contain before needing a resize.
         private int maxEntityCount = 0;
         // Tracks which entity indexes are available to be reclaimed.
-        private DeadIndexList deadIndexes = new();
+        private readonly DeadIndexList deadIndexes = new();
         // Tracks the generation number for each entity. The index for this list is the entity index.
-        private List<int> generationByEntityIndex = new();
+        private readonly List<int> generationByEntityIndex = new();
         // Stores each game system, in order of execution.
-        private List<GameSystem> Systems = new();
+        private readonly List<GameSystem> Systems = new();
 
         private void ReserveType(Type type, string reason)
         {
@@ -79,7 +79,7 @@ namespace TakeSword
             ,ParameterKeyByType(typeof(T1))
             };
             // Store the permissive version of the action, along with its parameter type information
-            GameSystem system = new GameSystem(permissiveAction, componentIds);
+            GameSystem system = new(permissiveAction, componentIds);
             Systems.Add(system);
         }
 
@@ -101,7 +101,7 @@ namespace TakeSword
             ,ParameterKeyByType(typeof(T1))
             ,ParameterKeyByType(typeof(T2))
             };
-            GameSystem system = new GameSystem(permissiveAction, parameterKeys);
+            GameSystem system = new(permissiveAction, parameterKeys);
             Systems.Add(system);
         }
 
@@ -313,13 +313,13 @@ namespace TakeSword
         public void RegisterComponent<T>() where T : class
         {
             // This list will be full of nulls at first
-            ListComponentStorage entries = new ListComponentStorage(maxEntityCount);
+            ListComponentStorage entries = new(maxEntityCount);
             RegisterComponent<T>(entries);
         }
 
         public void RegisterSparseComponent<T>() where T : class
         {
-            DictionaryComponentStorage entries = new DictionaryComponentStorage();
+            DictionaryComponentStorage entries = new();
             RegisterComponent<T>(entries);
         }
 

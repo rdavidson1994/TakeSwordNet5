@@ -4,7 +4,7 @@ namespace TakeSword
 {
     public class DictionaryComponentStorage : IComponentStorage
     {
-        private Dictionary<int, object?> innerDictionary = new();
+        private readonly Dictionary<int, object?> innerDictionary = new();
 
         public void Expand()
         {

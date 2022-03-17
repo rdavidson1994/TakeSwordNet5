@@ -9,7 +9,7 @@ namespace TakeSword
 {
     public class OutputTemplate
     {
-        private List<object> entries = new();
+        private readonly List<object> entries = new();
         public void Add(string text)
         {
             entries.Add(text);

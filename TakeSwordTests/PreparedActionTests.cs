@@ -12,8 +12,8 @@ namespace TakeSwordTests
     {
         private record MockPreparedAction : PreparedAction
         {
-            private ActionOutcome scriptedDryRunOutcome;
-            private ActionOutcome scriptedActualOutcome;
+            private readonly ActionOutcome scriptedDryRunOutcome;
+            private readonly ActionOutcome scriptedActualOutcome;
             private readonly uint preparationNeeded;
 
             public MockPreparedAction(ActionOutcome scriptedDryRunOutcome, ActionOutcome scriptedActualOutcome, uint prepartionNeeded)

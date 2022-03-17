@@ -6,7 +6,7 @@ namespace TakeSword
 {
     public static class Program
     {
-        public static void Main(string[] args)
+        public static void Main()
         {
             World world = new();
             WorldSetup.Apply(world, out Entity playerEntity, out Entity startLocation);

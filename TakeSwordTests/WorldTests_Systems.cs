@@ -13,7 +13,7 @@ namespace TakeSwordTests
         private EntityId alice;
         private EntityId bob;
         private EntityId charlie;
-        private EntityId debby;
+
 
         [SetUp]
         public void SetUp()
@@ -27,8 +27,6 @@ namespace TakeSwordTests
             alice = world.CreateEntityId(new Lycanthropy(10));
             bob = world.CreateEntityId(new Lycanthropy(20), new FullMoonVisible(20));
             charlie = world.CreateEntityId(new FullMoonVisible(30));
-            debby = world.CreateEntityId();
-
         }
 
         [Test]
