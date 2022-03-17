@@ -4,7 +4,8 @@ using System.Linq;
 
 namespace TakeSword
 {
-    public class World
+
+    public class World : IWorld
     {
         // Tracks the relationship between types and the component ID/index assigned to that type.
         private Dictionary<Type, int> componentIdsByType = new();
