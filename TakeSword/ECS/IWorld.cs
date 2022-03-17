@@ -22,7 +22,6 @@ namespace TakeSword
         {
             // By default, do nothing. Some implementations may not need registration.
         }
-        void RegisterSparseComponent<T>() where T : class;
         void RemoveComponent<T>(EntityId entityId);
         void RemoveMembership<M>(EntityId entityId);
         Entity? RetrieveEntity(EntityId entityId);
@@ -89,5 +88,10 @@ namespace TakeSword
             world.RegisterComponent<T>(ComponentStorage.List);
         }
 
+
+        public static void RegisterSparseComponent<T>(this IWorld world) where T : class
+        {
+            world.RegisterComponent<T>(ComponentStorage.Dictionary);
+        }
     }
 }

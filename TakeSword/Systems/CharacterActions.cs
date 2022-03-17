@@ -2,7 +2,7 @@
 {
     public static class CharacterActions
     {
-        public static void Install(World world)
+        public static void Install(IWorld world)
         {
             world.InstallSystem<Actor<Entity>>((entityId, actor) =>
             {

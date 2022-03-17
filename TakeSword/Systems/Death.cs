@@ -9,12 +9,11 @@ namespace TakeSword
             if (health.Value > 0)
                 return;
             string nameString = name.Value;
-            Console.WriteLine($"{nameString} has died.");
             name.Write(new($"corpse of {nameString}"));
             health.Destroy();
             actor.Destroy();
         }
-        public static void Install(World world)
+        public static void Install(IWorld world)
         {
             world.InstallSystem<
                 Edit<Health>,
