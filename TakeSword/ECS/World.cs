@@ -441,19 +441,21 @@ namespace TakeSword
             RegisterComponent<CollectionComponent<TMember>>();
         }
 
-        public IEnumerable<Entity> GetMembers<M>(EntityId entityId)
+
+
+        public IEnumerable<EntityId> GetMemberIds<M>(EntityId entityId)
         {
             CollectionComponent<M>? found = GetComponent<CollectionComponent<M>>(entityId);
             if (found == null)
             {
-                return Enumerable.Empty<Entity>();
+                return Enumerable.Empty<EntityId>();
             }
             else
             {
-                return found.EnumerateMembers(this);
+                return found.EnumerateMemberIds(this);
             }
         }
-        
+
         public Tuple<M, EntityId>? GetMembership<M>(EntityId entityId)
         {
             MembershipComponent<M>? membershipComponent = GetComponent<MembershipComponent<M>>(entityId);
@@ -597,10 +599,13 @@ namespace TakeSword
         {
             public List<EntityId> Members { get; } = new();
 
-            public IEnumerable<Entity> EnumerateMembers(World world)
+            public IEnumerable<EntityId> EnumerateMemberIds(IWorld world)
             {
                 Members.RemoveAll(e => !world.EntityIsCurrent(e));
-                return Members.Select(e => new Entity(e, world));
+                foreach (EntityId memberId in Members)
+                {
+                    yield return memberId;
+                }
             }
         }
 
