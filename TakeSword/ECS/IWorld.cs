@@ -14,9 +14,14 @@ namespace TakeSword
         void InstallSystem<T0, T1, T2>(Action<EntityId, T0, T1, T2> effect);
         void InstallSystem<T0, T1>(Action<EntityId, T0, T1> effect);
         void InstallSystem<T0>(Action<EntityId, T0> effect);
-        void RegisterCollection<TMember>();
-        void RegisterComponent<T>() where T : class;
-        void RegisterComponent<T>(ComponentStorage storageType) where T : class;
+        void RegisterCollection<TMember>()
+        {
+            // By default, do nothing. Some implementations may not need registration.
+        }
+        void RegisterComponent<T>(ComponentStorage storageType) where T : class
+        {
+            // By default, do nothing. Some implementations may not need registration.
+        }
         void RegisterSparseComponent<T>() where T : class;
         void RemoveComponent<T>(EntityId entityId);
         void RemoveMembership<M>(EntityId entityId);
@@ -77,6 +82,11 @@ namespace TakeSword
             {
                 yield return new Entity(memberId, world);
             }
+        }
+
+        public static void RegisterComponent<T>(this IWorld world) where T : class
+        {
+            world.RegisterComponent<T>(ComponentStorage.List);
         }
 
     }
