@@ -1,6 +1,4 @@
-﻿using static TakeSword.ActionOutcome;
-
-namespace TakeSword
+﻿namespace TakeSword
 {
 
     public record LookAction(Entity Actor) : IInfoAction

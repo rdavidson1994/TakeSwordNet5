@@ -51,7 +51,7 @@ namespace TakeSword
                 string name = d.Name();
                 string letter = name[0].ToString();
 
-                var moveVerb = ZeroTarget(a => new DirectionMoveAction(a, d), name, letter, "go "+name, "go "+letter);
+                var moveVerb = ZeroTarget(a => new DirectionMoveAction(a, d), name, letter, "go " + name, "go " + letter);
                 output.Add(moveVerb);
 
             }

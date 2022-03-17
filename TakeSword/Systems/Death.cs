@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace TakeSword
+﻿namespace TakeSword
 {
     public static class Death
     {

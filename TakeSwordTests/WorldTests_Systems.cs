@@ -32,6 +32,7 @@ namespace TakeSwordTests
         [Test]
         public void Run_SystemWithMandatoryParameter_RequiresMatchingComponent()
         {
+            bool bobEnteredSystem = false;
             world.InstallSystem((
                 EntityId id,
                 Lycanthropy lycanthropy,
@@ -40,12 +41,12 @@ namespace TakeSwordTests
             {
                 // Only bob should enter this system
                 Assert.AreEqual(bob, id);
-                Assert.Pass();
+                bobEnteredSystem = true;
             });
             world.Run();
-            // If we get here without hitting the Assert.Pass in the system,
+            // If we get here without entering the system,
             // the test is failed.
-            Assert.Fail();
+            Assert.IsTrue(bobEnteredSystem);
         }
 
         [Test]

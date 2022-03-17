@@ -373,13 +373,6 @@ namespace TakeSword
             componentData[componentId].Remove(entityId.index);
         }
 
-
-        public Entity CreateEntity(params object[] components)
-        {
-            return new Entity(this.CreateEntityId(components), this);
-        }
-
-
         /// <summary>
         /// Determines whether the entity identified by <paramref name="entityId"/>
         /// still exists in the world.

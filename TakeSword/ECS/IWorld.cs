@@ -93,5 +93,10 @@ namespace TakeSword
         {
             world.RegisterComponent<T>(ComponentStorage.Dictionary);
         }
+
+        public static Entity CreateEntity(this IWorld world, params object[] components)
+        {
+            return new Entity(world.CreateEntityId(components), world);
+        }
     }
 }
