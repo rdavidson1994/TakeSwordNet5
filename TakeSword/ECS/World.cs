@@ -393,28 +393,9 @@ namespace TakeSword
 
         public Entity CreateEntity(params object[] components)
         {
-            return new Entity(CreateEntityId(components), this);
+            return new Entity(this.CreateEntityId(components), this);
         }
 
-        /// <summary>
-        /// create a new entity, with the requested components set.
-        /// </summary>
-        /// <param name="components">The list of components to set on the entity.
-        /// The runtime type of each argument will be used, not "object".</param>
-        /// <returns>The id of the newly created entity.</returns>
-        public EntityId CreateEntityId(params object[] components)
-        {
-            // Create a new entity 
-            EntityId output = CreateEntityId();
-            // Add the user's requested components.
-            foreach (object component in components)
-            {
-                Type realType = component.GetType();
-                int componentId = GetComponentId(realType);
-                componentData[componentId][output.index] = component;
-            }
-            return output;
-        }
 
         /// <summary>
         /// Determines whether the entity identified by <paramref name="entityId"/>
@@ -489,7 +470,7 @@ namespace TakeSword
                 return found.EnumerateMembers(this);
             }
         }
-
+        
         public Tuple<M, EntityId>? GetMembership<M>(EntityId entityId)
         {
             MembershipComponent<M>? membershipComponent = GetComponent<MembershipComponent<M>>(entityId);
@@ -551,7 +532,7 @@ namespace TakeSword
             MembershipComponent<M>? previousMemberData = GetComponent<MembershipComponent<M>>(memberId);
 
             // Set the new member data for the member entity.
-            SetComponent(memberId, new MembershipComponent<M>(memberData, destinationCollectionId));
+            this.SetComponent(memberId, new MembershipComponent<M>(memberData, destinationCollectionId));
 
             // If the collection entity is the same as the previous one, no other changes are needed
             if (destinationCollectionId.Equals(previousMemberData?.Collection))
@@ -617,6 +598,16 @@ namespace TakeSword
                 output = new EntityId(maxEntityCount - 1, 0);
             }
             return output;
+        }
+
+        public void SetComponentByType(EntityId entityId, Type componentType, object componentValue)
+        {
+            int componentId = GetComponentId(componentType);
+            if (!EntityIsCurrent(entityId))
+            {
+                throw new ComponentException("Entity has already been destroyed");
+            }
+            componentData[componentId][entityId.index] = componentValue;
         }
 
         private class CollectionComponent<T>

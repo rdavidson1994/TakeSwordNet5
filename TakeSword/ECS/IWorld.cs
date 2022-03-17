@@ -26,10 +26,28 @@ namespace TakeSword
         void Run();
         void SetComponent<T>(EntityId entityId, T componentValue);
         void SetMembership<M>(EntityId memberId, M memberData, EntityId destinationCollectionId) where M : class;
+        void SetComponentByType(EntityId outputEntity, Type componentType, object component);
     }
 
     public static class WorldExtensions
     {
-
+        /// <summary>
+        /// create a new entity, with the requested components set.
+        /// </summary>
+        /// <param name="components">The list of components to set on the entity.
+        /// The runtime type of each argument will be used, not "object".</param>
+        /// <returns>The id of the newly created entity.</returns>
+        public static EntityId CreateEntityId(this IWorld world, params object[] components)
+        {
+            // Create a new entity 
+            EntityId outputEntity = world.CreateEntityId();
+            // Add the user's requested components.
+            foreach (object component in components)
+            {
+                Type componentType = component.GetType();
+                world.SetComponentByType(outputEntity, componentType, component);
+            }
+            return outputEntity;
+        }
     }
 }
