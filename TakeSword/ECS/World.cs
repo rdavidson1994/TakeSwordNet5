@@ -404,31 +404,8 @@ namespace TakeSword
         /// <returns>The id of the newly created entity.</returns>
         public EntityId CreateEntityId(params object[] components)
         {
-            EntityId output;
-            // Try to reclaim a vacant index
-            if (deadIndexes.ReclaimIndex(out int indexToReclaim))
-            {
-                foreach (IComponentStorage componentStorage in componentData)
-                {
-                    // Clear lingering component data at the vacant index
-                    componentStorage.Remove(indexToReclaim);
-                }
-                output = new EntityId(indexToReclaim, generationByEntityIndex[indexToReclaim]);
-            }
-
-            // If no vacant index is available, expand all storage by 1 and return the new final index.
-            else
-            {
-                foreach (IComponentStorage componentStorage in componentData)
-                {
-                    componentStorage.Expand();
-                }
-                generationByEntityIndex.Add(0);
-                deadIndexes.AddLivingMember();
-                maxEntityCount += 1;
-                output = new EntityId(maxEntityCount - 1, 0);
-            }
-
+            // Create a new entity 
+            EntityId output = CreateEntityId();
             // Add the user's requested components.
             foreach (object component in components)
             {
@@ -611,6 +588,35 @@ namespace TakeSword
 
             // Otherwise, remove this member from it.
             previousCollectionComponent.Members.Remove(memberId);
+        }
+
+        public EntityId CreateEntityId()
+        {
+            EntityId output;
+            // Try to reclaim a vacant index
+            if (deadIndexes.ReclaimIndex(out int indexToReclaim))
+            {
+                foreach (IComponentStorage componentStorage in componentData)
+                {
+                    // Clear lingering component data at the vacant index
+                    componentStorage.Remove(indexToReclaim);
+                }
+                output = new EntityId(indexToReclaim, generationByEntityIndex[indexToReclaim]);
+            }
+
+            // If no vacant index is available, expand all storage by 1 and return the new final index.
+            else
+            {
+                foreach (IComponentStorage componentStorage in componentData)
+                {
+                    componentStorage.Expand();
+                }
+                generationByEntityIndex.Add(0);
+                deadIndexes.AddLivingMember();
+                maxEntityCount += 1;
+                output = new EntityId(maxEntityCount - 1, 0);
+            }
+            return output;
         }
 
         private class CollectionComponent<T>

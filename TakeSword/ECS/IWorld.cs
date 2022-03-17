@@ -5,8 +5,8 @@ namespace TakeSword
 {
     public interface IWorld
     {
-        Entity CreateEntity(params object[] components);
-        EntityId CreateEntityId(params object[] components);
+        EntityId CreateEntityId();
+        //EntityId CreateEntityId(params object[] components);
         void DestroyEntity(EntityId entityId);
         bool EntityIsCurrent(EntityId entityId);
         T? GetComponent<T>(EntityId entityId) where T : class;
@@ -26,5 +26,10 @@ namespace TakeSword
         void Run();
         void SetComponent<T>(EntityId entityId, T componentValue);
         void SetMembership<M>(EntityId memberId, M memberData, EntityId destinationCollectionId) where M : class;
+    }
+
+    public static class WorldExtensions
+    {
+
     }
 }
