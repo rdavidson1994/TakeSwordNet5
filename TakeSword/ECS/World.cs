@@ -332,23 +332,6 @@ namespace TakeSword
             componentIdsByType[typeof(T)] = componentData.Count - 1;
         }
 
-        /// <summary>
-        /// Sets the component of type <typeparamref name="T"/> for the
-        /// entity identified by <paramref name="entityId"/> to <paramref name="componentValue"/>.
-        /// If the component is already present on the entity, its existing value is replaced.
-        /// </summary>
-        /// <typeparam name="T">The type of component to bet set.</typeparam>
-        /// <param name="entityId">The entity to be modified.</param>
-        /// <param name="componentValue">The new value of the component.</param>
-        public void SetComponent<T>(EntityId entityId, T componentValue)
-        {
-            int componentId = GetComponentId<T>();
-            if (!EntityIsCurrent(entityId))
-            {
-                throw new ComponentException("Entity has already been destroyed");
-            }
-            componentData[componentId][entityId.index] = componentValue;
-        }
 
         /// <summary>
         /// Retrieve id (index) of the registered component for this Type.
@@ -546,7 +529,7 @@ namespace TakeSword
             if (destinationCollectionData is null)
             {
                 CollectionComponent<M> newCollectionData = new();
-                SetComponent(destinationCollectionId, newCollectionData);
+                this.SetComponent(destinationCollectionId, newCollectionData);
                 destinationCollectionData = newCollectionData;
             }
             destinationCollectionData.Members.Add(memberId);

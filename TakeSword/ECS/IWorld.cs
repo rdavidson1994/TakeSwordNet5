@@ -24,7 +24,6 @@ namespace TakeSword
         void RemoveMembership<M>(EntityId entityId);
         Entity? RetrieveEntity(EntityId entityId);
         void Run();
-        void SetComponent<T>(EntityId entityId, T componentValue);
         void SetMembership<M>(EntityId memberId, M memberData, EntityId destinationCollectionId) where M : class;
         void SetComponentByType(EntityId outputEntity, Type componentType, object component);
     }
@@ -49,5 +48,29 @@ namespace TakeSword
             }
             return outputEntity;
         }
+
+        /// <summary>
+        /// Sets the component of type <typeparamref name="T"/> for the
+        /// entity identified by <paramref name="entityId"/> to <paramref name="componentValue"/>.
+        /// If the component is already present on the entity, its existing value is replaced.
+        /// </summary>
+        /// <typeparam name="T">The type of component to bet set.</typeparam>
+        /// <param name="entityId">The entity to be modified.</param>
+        /// <param name="componentValue">The new value of the component.</param>
+        public static void SetComponent<T>(this IWorld world, EntityId entityId, T componentValue)
+        {
+            Type componentType = typeof(T);
+            if (!world.EntityIsCurrent(entityId))
+            {
+                throw new ComponentException("Entity has already been destroyed");
+            }
+            if (componentValue is null)
+            {
+                throw new ComponentException("Attempted to set null value for component");
+            }
+            world.SetComponentByType(entityId, componentType, componentValue);
+
+        }
+
     }
 }
