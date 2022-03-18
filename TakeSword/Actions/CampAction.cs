@@ -1,3 +1,4 @@
+using static TakeSword.ActionOutcome;
 namespace TakeSword
 {
     public record CampAction(Entity Actor) : PreparedAction
@@ -6,13 +7,28 @@ namespace TakeSword
 
         protected override ActionOutcome GetCompletionOutcome(bool dryRun = false)
         {
-            // Todo - make sure you're outside
-            if (dryRun)
+            Entity? location = Actor.GetParent<Location>();
+            if (location is null)
             {
-                return ActionOutcome.Success();
+                return Failure("you cannot camp when you lack a physical location");
             }
 
-            return ActionOutcome.Success();
+            var wilderness = location.Get<Wilderness>();
+            if (wilderness is null)
+            {
+                return Failure("you can only camp in the wilderness");
+            }
+
+            if (wilderness.HasCampsite)
+            {
+                return Failure("there is already a campsite here");
+            }
+
+            if (!dryRun)
+            {
+                location.Set(wilderness with { HasCampsite = true });
+            }
+            return Success();
         }
     }
 }

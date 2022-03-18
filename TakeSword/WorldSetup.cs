@@ -24,6 +24,7 @@ namespace TakeSword
             register<WeaponTraits>();
             register<RoomExits>();
             register<Motion>();
+            register<Wilderness>();
 
             // Collections
             world.RegisterCollection<Location>();
@@ -84,6 +85,9 @@ namespace TakeSword
                 {
                     "You stand among tall grasses in a field of gently rolling hills."
                 }),
+                new Wilderness(
+                    HasCampsite: false
+                ),
                 new RoomExits() with
                 {
                     North = secondLocation.Id
