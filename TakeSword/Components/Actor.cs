@@ -2,7 +2,7 @@
 {
     public class Actor<T> : IActor<T>
     {
-        private IActor<T> implementor;
+        private readonly IActor<T> implementor;
 
         public Actor(IActor<T> implementor)
         {

@@ -4,28 +4,29 @@ using System.Linq;
 
 namespace TakeSword
 {
-    public class World
+
+    public class World : IWorld
     {
         // Tracks the relationship between types and the component ID/index assigned to that type.
-        private Dictionary<Type, int> componentIdsByType = new();
+        private readonly Dictionary<Type, int> componentIdsByType = new();
         // Tracks the reason each Type was registered, for more detailed error message.
-        private Dictionary<Type, string> registrationReasonByType = new();
+        private readonly Dictionary<Type, string> registrationReasonByType = new();
         // Tracks which types have been registered as collection membership components
-        private HashSet<Type> membershipComponentTypes = new();
+        private readonly HashSet<Type> membershipComponentTypes = new();
         // Stores all data for all components.
         // The index for this list is the component ID.
-        private List<IComponentStorage> componentData = new();
+        private readonly List<IComponentStorage> componentData = new();
         // Stores factory instances used to construct wrapper types of each component. 
         // The index for this list is the component ID.
-        private List<IWrapperFactory> writeWrapperFactories = new();
+        private readonly List<IWrapperFactory> writeWrapperFactories = new();
         // The largest number of entities the world can contain before needing a resize.
         private int maxEntityCount = 0;
         // Tracks which entity indexes are available to be reclaimed.
-        private DeadIndexList deadIndexes = new();
+        private readonly DeadIndexList deadIndexes = new();
         // Tracks the generation number for each entity. The index for this list is the entity index.
-        private List<int> generationByEntityIndex = new();
+        private readonly List<int> generationByEntityIndex = new();
         // Stores each game system, in order of execution.
-        private List<GameSystem> Systems = new();
+        private readonly List<GameSystem> Systems = new();
 
         private void ReserveType(Type type, string reason)
         {
@@ -78,7 +79,7 @@ namespace TakeSword
             ,ParameterKeyByType(typeof(T1))
             };
             // Store the permissive version of the action, along with its parameter type information
-            GameSystem system = new GameSystem(permissiveAction, componentIds);
+            GameSystem system = new(permissiveAction, componentIds);
             Systems.Add(system);
         }
 
@@ -100,7 +101,7 @@ namespace TakeSword
             ,ParameterKeyByType(typeof(T1))
             ,ParameterKeyByType(typeof(T2))
             };
-            GameSystem system = new GameSystem(permissiveAction, parameterKeys);
+            GameSystem system = new(permissiveAction, parameterKeys);
             Systems.Add(system);
         }
 
@@ -312,13 +313,13 @@ namespace TakeSword
         public void RegisterComponent<T>() where T : class
         {
             // This list will be full of nulls at first
-            ListComponentStorage entries = new ListComponentStorage(maxEntityCount);
+            ListComponentStorage entries = new(maxEntityCount);
             RegisterComponent<T>(entries);
         }
 
         public void RegisterSparseComponent<T>() where T : class
         {
-            DictionaryComponentStorage entries = new DictionaryComponentStorage();
+            DictionaryComponentStorage entries = new();
             RegisterComponent<T>(entries);
         }
 
@@ -331,23 +332,6 @@ namespace TakeSword
             componentIdsByType[typeof(T)] = componentData.Count - 1;
         }
 
-        /// <summary>
-        /// Sets the component of type <typeparamref name="T"/> for the
-        /// entity identified by <paramref name="entityId"/> to <paramref name="componentValue"/>.
-        /// If the component is already present on the entity, its existing value is replaced.
-        /// </summary>
-        /// <typeparam name="T">The type of component to bet set.</typeparam>
-        /// <param name="entityId">The entity to be modified.</param>
-        /// <param name="componentValue">The new value of the component.</param>
-        public void SetComponent<T>(EntityId entityId, T componentValue)
-        {
-            int componentId = GetComponentId<T>();
-            if (!EntityIsCurrent(entityId))
-            {
-                throw new ComponentException("Entity has already been destroyed");
-            }
-            componentData[componentId][entityId.index] = componentValue;
-        }
 
         /// <summary>
         /// Retrieve id (index) of the registered component for this Type.
@@ -387,55 +371,6 @@ namespace TakeSword
                 throw new ComponentException("Entity has already been destroyed");
             }
             componentData[componentId].Remove(entityId.index);
-        }
-
-
-        public Entity CreateEntity(params object[] components)
-        {
-            return new Entity(CreateEntityId(components), this);
-        }
-
-        /// <summary>
-        /// create a new entity, with the requested components set.
-        /// </summary>
-        /// <param name="components">The list of components to set on the entity.
-        /// The runtime type of each argument will be used, not "object".</param>
-        /// <returns>The id of the newly created entity.</returns>
-        public EntityId CreateEntityId(params object[] components)
-        {
-            EntityId output;
-            // Try to reclaim a vacant index
-            if (deadIndexes.ReclaimIndex(out int indexToReclaim))
-            {
-                foreach (IComponentStorage componentStorage in componentData)
-                {
-                    // Clear lingering component data at the vacant index
-                    componentStorage.Remove(indexToReclaim);
-                }
-                output = new EntityId(indexToReclaim, generationByEntityIndex[indexToReclaim]);
-            }
-
-            // If no vacant index is available, expand all storage by 1 and return the new final index.
-            else
-            {
-                foreach (IComponentStorage componentStorage in componentData)
-                {
-                    componentStorage.Expand();
-                }
-                generationByEntityIndex.Add(0);
-                deadIndexes.AddLivingMember();
-                maxEntityCount += 1;
-                output = new EntityId(maxEntityCount - 1, 0);
-            }
-
-            // Add the user's requested components.
-            foreach (object component in components)
-            {
-                Type realType = component.GetType();
-                int componentId = GetComponentId(realType);
-                componentData[componentId][output.index] = component;
-            }
-            return output;
         }
 
         /// <summary>
@@ -499,16 +434,18 @@ namespace TakeSword
             RegisterComponent<CollectionComponent<TMember>>();
         }
 
-        public IEnumerable<Entity> GetMembers<M>(EntityId entityId)
+
+
+        public IEnumerable<EntityId> GetMemberIds<M>(EntityId entityId)
         {
             CollectionComponent<M>? found = GetComponent<CollectionComponent<M>>(entityId);
             if (found == null)
             {
-                return Enumerable.Empty<Entity>();
+                return Enumerable.Empty<EntityId>();
             }
             else
             {
-                return found.EnumerateMembers(this);
+                return found.EnumerateMemberIds(this);
             }
         }
 
@@ -573,7 +510,7 @@ namespace TakeSword
             MembershipComponent<M>? previousMemberData = GetComponent<MembershipComponent<M>>(memberId);
 
             // Set the new member data for the member entity.
-            SetComponent(memberId, new MembershipComponent<M>(memberData, destinationCollectionId));
+            this.SetComponent(memberId, new MembershipComponent<M>(memberData, destinationCollectionId));
 
             // If the collection entity is the same as the previous one, no other changes are needed
             if (destinationCollectionId.Equals(previousMemberData?.Collection))
@@ -587,7 +524,7 @@ namespace TakeSword
             if (destinationCollectionData is null)
             {
                 CollectionComponent<M> newCollectionData = new();
-                SetComponent(destinationCollectionId, newCollectionData);
+                this.SetComponent(destinationCollectionId, newCollectionData);
                 destinationCollectionData = newCollectionData;
             }
             destinationCollectionData.Members.Add(memberId);
@@ -612,14 +549,56 @@ namespace TakeSword
             previousCollectionComponent.Members.Remove(memberId);
         }
 
+        public EntityId CreateEntityId()
+        {
+            EntityId output;
+            // Try to reclaim a vacant index
+            if (deadIndexes.ReclaimIndex(out int indexToReclaim))
+            {
+                foreach (IComponentStorage componentStorage in componentData)
+                {
+                    // Clear lingering component data at the vacant index
+                    componentStorage.Remove(indexToReclaim);
+                }
+                output = new EntityId(indexToReclaim, generationByEntityIndex[indexToReclaim]);
+            }
+
+            // If no vacant index is available, expand all storage by 1 and return the new final index.
+            else
+            {
+                foreach (IComponentStorage componentStorage in componentData)
+                {
+                    componentStorage.Expand();
+                }
+                generationByEntityIndex.Add(0);
+                deadIndexes.AddLivingMember();
+                maxEntityCount += 1;
+                output = new EntityId(maxEntityCount - 1, 0);
+            }
+            return output;
+        }
+
+        public void SetComponentByType(EntityId entityId, Type componentType, object componentValue)
+        {
+            int componentId = GetComponentId(componentType);
+            if (!EntityIsCurrent(entityId))
+            {
+                throw new ComponentException("Entity has already been destroyed");
+            }
+            componentData[componentId][entityId.index] = componentValue;
+        }
+
         private class CollectionComponent<T>
         {
             public List<EntityId> Members { get; } = new();
 
-            public IEnumerable<Entity> EnumerateMembers(World world)
+            public IEnumerable<EntityId> EnumerateMemberIds(IWorld world)
             {
                 Members.RemoveAll(e => !world.EntityIsCurrent(e));
-                return Members.Select(e => new Entity(e, world));
+                foreach (EntityId memberId in Members)
+                {
+                    yield return memberId;
+                }
             }
         }
 

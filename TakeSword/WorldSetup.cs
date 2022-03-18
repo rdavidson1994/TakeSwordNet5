@@ -24,6 +24,7 @@ namespace TakeSword
             register<WeaponTraits>();
             register<RoomExits>();
             register<Motion>();
+            register<Wilderness>();
 
             // Collections
             world.RegisterCollection<Location>();
@@ -84,16 +85,19 @@ namespace TakeSword
                 {
                     "You stand among tall grasses in a field of gently rolling hills."
                 }),
-                new RoomExits(new()
+                new Wilderness(
+                    HasCampsite: false
+                ),
+                new RoomExits() with
                 {
-                    [Direction.North] = secondLocation.Id
-                })
+                    North = secondLocation.Id
+                }
             );
 
-            secondLocation.Set(new RoomExits(new()
+            secondLocation.Set(new RoomExits() with
             {
-                [Direction.South] = startLocation.Id
-            }));
+                South = startLocation.Id
+            });
 
             player.Enter<Location>(startLocation);
             sword.Enter<Location>(startLocation);

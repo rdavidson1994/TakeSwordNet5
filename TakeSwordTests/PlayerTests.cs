@@ -12,7 +12,7 @@ namespace TakeSwordTests
             this.inputs = inputs;
         }
 
-        private List<string> inputs;
+        private readonly List<string> inputs;
         public string OutputData { get; private set; } = "";
 
         public string ReadLine()
@@ -35,7 +35,7 @@ namespace TakeSwordTests
 
     public class PlayerTests
     {
-        private VerbSuite<DummyEntity> verbSuite;
+        private readonly VerbSuite<DummyEntity> verbSuite;
 
         const DummyEntity PLAYER = 1;
         const DummyEntity IRON_SWORD = 2;

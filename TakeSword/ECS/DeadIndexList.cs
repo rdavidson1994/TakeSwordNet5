@@ -5,8 +5,8 @@ namespace TakeSword
 {
     internal class DeadIndexList : IEnumerable<int>
     {
-        private List<bool> isDeadByIndex = new();
-        private List<int> deadIndexes = new();
+        private readonly List<bool> isDeadByIndex = new();
+        private readonly List<int> deadIndexes = new();
         public int Count => deadIndexes.Count;
         public void MarkDead(int index)
         {

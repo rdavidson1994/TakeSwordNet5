@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace TakeSword
 {
@@ -49,7 +48,7 @@ namespace TakeSword
 
     public static class DirectionConverter
     {
-        static Dictionary<string, Direction> letterToDirection = new Dictionary<string, Direction>
+        static readonly Dictionary<string, Direction> letterToDirection = new Dictionary<string, Direction>
         {
             {"n", Direction.North },
             {"s", Direction.South },
@@ -59,7 +58,7 @@ namespace TakeSword
             {"d", Direction.Down },
         };
 
-        static string[] directionNames = { "north", "south", "east", "west", "up", "down" };
+        static readonly string[] directionNames = { "north", "south", "east", "west", "up", "down" };
         public static Direction FromString(string str)
         {
             string key;

@@ -6,10 +6,10 @@ namespace TakeSword
     public class Entity
     {
         public EntityId Id { get; }
-        private World world;
+        private readonly IWorld world;
 
 
-        internal Entity(EntityId entityId, World world)
+        internal Entity(EntityId entityId, IWorld world)
         {
             this.Id = entityId;
             this.world = world;
@@ -118,7 +118,7 @@ namespace TakeSword
         {
             return obj is Entity entity &&
                    EqualityComparer<EntityId>.Default.Equals(Id, entity.Id) &&
-                   EqualityComparer<World>.Default.Equals(world, entity.world);
+                   EqualityComparer<IWorld>.Default.Equals(world, entity.world);
         }
 
         public override int GetHashCode()

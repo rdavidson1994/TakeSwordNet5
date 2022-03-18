@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using NUnit.Framework;
 using TakeSword;
-using NUnit.Framework;
 
 namespace TakeSwordTests
 {
@@ -12,8 +7,8 @@ namespace TakeSwordTests
     {
         private record MockPreparedAction : PreparedAction
         {
-            private ActionOutcome scriptedDryRunOutcome;
-            private ActionOutcome scriptedActualOutcome;
+            private readonly ActionOutcome scriptedDryRunOutcome;
+            private readonly ActionOutcome scriptedActualOutcome;
             private readonly uint preparationNeeded;
 
             public MockPreparedAction(ActionOutcome scriptedDryRunOutcome, ActionOutcome scriptedActualOutcome, uint prepartionNeeded)

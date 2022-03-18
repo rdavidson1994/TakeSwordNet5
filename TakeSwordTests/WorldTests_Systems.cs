@@ -13,7 +13,7 @@ namespace TakeSwordTests
         private EntityId alice;
         private EntityId bob;
         private EntityId charlie;
-        private EntityId debby;
+
 
         [SetUp]
         public void SetUp()
@@ -27,13 +27,12 @@ namespace TakeSwordTests
             alice = world.CreateEntityId(new Lycanthropy(10));
             bob = world.CreateEntityId(new Lycanthropy(20), new FullMoonVisible(20));
             charlie = world.CreateEntityId(new FullMoonVisible(30));
-            debby = world.CreateEntityId();
-
         }
 
         [Test]
         public void Run_SystemWithMandatoryParameter_RequiresMatchingComponent()
         {
+            bool bobEnteredSystem = false;
             world.InstallSystem((
                 EntityId id,
                 Lycanthropy lycanthropy,
@@ -42,12 +41,12 @@ namespace TakeSwordTests
             {
                 // Only bob should enter this system
                 Assert.AreEqual(bob, id);
-                Assert.Pass();
+                bobEnteredSystem = true;
             });
             world.Run();
-            // If we get here without hitting the Assert.Pass in the system,
+            // If we get here without entering the system,
             // the test is failed.
-            Assert.Fail();
+            Assert.IsTrue(bobEnteredSystem);
         }
 
         [Test]

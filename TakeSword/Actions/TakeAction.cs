@@ -1,5 +1,4 @@
-﻿using System;
-using static TakeSword.ActionOutcome;
+﻿using static TakeSword.ActionOutcome;
 
 namespace TakeSword
 {

@@ -112,7 +112,7 @@ namespace TakeSwordTests
             world.SetMembership(alice, new TeamMemberTraits(10), redTeam);
             world.SetMembership(bob, new TeamMemberTraits(20), redTeam);
             world.DestroyEntity(bob);
-            var redIds = world.GetMembers<TeamMemberTraits>(redTeam).Select((e) => e.Id);
+            var redIds = (world.GetMembers<TeamMemberTraits>(redTeam).Select((e) => e.Id)).ToList();
             CollectionAssert.AreEqual(redIds, new[] { alice });
         }
 
