@@ -37,6 +37,7 @@ namespace TakeSword
                 ZeroTarget(a => new LookAction(a), "look", "examine", "x"),
                 ZeroTarget(a => new WaitAction(a), "wait"),
                 ZeroTarget(a => new CampAction(a), "camp", "make camp"),
+                ZeroTarget(a => new RelaxAction(a, new Random().NextDouble()), "relax", "rest"),
                 OneTargetWithTool((actor, target, weapon) => new HitAction(actor, target, weapon), "hit", "strike", "attack"),
                 OneTarget((a, t) => new DropAction(a, t), "drop", "put down", "discard"),
                 OneTarget((a, t) => new TakeAction(a, t), "take", "get", "pick up"),

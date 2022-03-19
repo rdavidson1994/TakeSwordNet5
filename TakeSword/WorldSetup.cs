@@ -8,23 +8,19 @@ namespace TakeSword
         public static void Apply(World world, out Entity player, out Entity startLocation)
         {
             // Component registration
-            void register<T>() where T : class
-            {
-                world.RegisterComponent<T>();
-            }
-            register<Senses>();
-            register<ItemTraits>();
-            register<Visibility>();
-            register<Name>();
-            register<FoodTraits>();
-            register<SceneDescription>();
-            register<Actor<Entity>>();
-            register<Health>();
-            register<NaturalAttack>();
-            register<WeaponTraits>();
-            register<RoomExits>();
-            register<Motion>();
-            register<Wilderness>();
+            world.RegisterComponent<Senses>();
+            world.RegisterComponent<ItemTraits>();
+            world.RegisterComponent<Visibility>();
+            world.RegisterComponent<Name>();
+            world.RegisterComponent<FoodTraits>();
+            world.RegisterComponent<SceneDescription>();
+            world.RegisterComponent<Actor<Entity>>();
+            world.RegisterComponent<Health>();
+            world.RegisterComponent<NaturalAttack>();
+            world.RegisterComponent<WeaponTraits>();
+            world.RegisterComponent<RoomExits>();
+            world.RegisterComponent<Motion>();
+            world.RegisterComponent<Wilderness>();
 
             // Collections
             world.RegisterCollection<Location>();
@@ -33,13 +29,6 @@ namespace TakeSword
             CharacterActions.Install(world);
             Death.Install(world);
             Motion.SystemInstall(world);
-            world.InstallSystem<Name>((e, name) =>
-            {
-                if (name.Value == "player")
-                {
-                    System.Console.WriteLine("Tick...");
-                }
-            });
 
 
             // Entity creation
