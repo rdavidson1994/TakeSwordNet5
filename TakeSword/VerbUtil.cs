@@ -37,8 +37,11 @@ namespace TakeSword
                 ZeroTarget(a => new LookAction(a), "look", "examine", "x"),
                 ZeroTarget(a => new WaitAction(a), "wait"),
                 ZeroTarget(a => new CampAction(a), "camp", "make camp"),
+                ZeroTarget(a => new BreakCampAction(a), "break camp", "tear down camp", "pack up"),
                 ZeroTarget(a => new RelaxAction(a, new Random().NextDouble()), "relax", "rest"),
+
                 OneTargetWithTool((actor, target, weapon) => new HitAction(actor, target, weapon), "hit", "strike", "attack"),
+                
                 OneTarget((a, t) => new DropAction(a, t), "drop", "put down", "discard"),
                 OneTarget((a, t) => new TakeAction(a, t), "take", "get", "pick up"),
                 OneTarget((a, t) => new ConsumeAction(a, t), "consume"),
@@ -54,9 +57,7 @@ namespace TakeSword
 
                 var moveVerb = ZeroTarget(a => new DirectionMoveAction(a, d), name, letter, "go " + name, "go " + letter);
                 output.Add(moveVerb);
-
             }
-
 
             return output;
         }
