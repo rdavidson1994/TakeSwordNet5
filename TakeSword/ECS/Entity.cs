@@ -114,6 +114,8 @@ namespace TakeSword
             return world.GetMembers<T>(Id);
         }
 
+        public int Time => world.IterationCount;
+
         public override bool Equals(object? obj)
         {
             return obj is Entity entity &&

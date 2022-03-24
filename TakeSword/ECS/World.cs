@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace TakeSword
 {
-
     public class World : IWorld
     {
         // Tracks the relationship between types and the component ID/index assigned to that type.
@@ -27,6 +26,8 @@ namespace TakeSword
         private readonly List<int> generationByEntityIndex = new();
         // Stores each game system, in order of execution.
         private readonly List<GameSystem> Systems = new();
+        // Records how many turns the game has lasted
+        public int IterationCount { get; private set; }
 
         private void ReserveType(Type type, string reason)
         {
@@ -155,6 +156,7 @@ namespace TakeSword
             {
                 RunSystem(system);
             }
+            IterationCount += 1;
         }
 
         private object? GetWrappedComponent(ParameterKey parameterKey, int entityIndex)

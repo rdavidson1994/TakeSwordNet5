@@ -5,6 +5,8 @@ namespace TakeSword
 {
     public interface IWorld
     {
+        int IterationCount { get; }
+
         EntityId CreateEntityId();
         void DestroyEntity(EntityId entityId);
         bool EntityIsCurrent(EntityId entityId);

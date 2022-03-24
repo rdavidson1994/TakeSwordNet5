@@ -22,12 +22,27 @@ namespace TakeSword
                 yield break;
             }
 
-            for (int i = 0; i < 14400; i++)
-            {
-                yield return Progress().AsAction();
-            }
+            string time = TimeUtilities.ClockTime(Actor.Time);
+            string message = $"at {time} you decide to finish your adventures for the day";
+
+            yield return Success(message).AsAction();
 
             yield return DowntimeUtilities.GetDowntimeActivity(Actor, DiceRoll);
+
+            while (TimeUtilities.IsDay(Actor.Time))
+            {
+                yield return Success().AsAction();
+            }
+            time = TimeUtilities.ClockTime(Actor.Time);
+            yield return Success($"you go to sleep at {time}").AsAction();
+            
+            while (TimeUtilities.IsNight(Actor.Time))
+            {
+                yield return Success().AsAction();
+            }
+            time = TimeUtilities.ClockTime(Actor.Time);
+            yield return Success($"you wake up at {time}").AsAction();
+
         }
     }
 }
