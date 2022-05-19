@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using NUnit.Framework;
 using TakeSword;
 
@@ -127,6 +128,20 @@ namespace TakeSwordTests
             EntityId entity = world.CreateEntityId();
             world.DestroyEntity(entity);
             Assert.Throws<ComponentException>(() => world.DestroyEntity(entity));
+        }
+
+        [Test]
+        public void SerializationYieldsExpectedJson()
+        {
+            world.RegisterComponent<NumberComponent>(ComponentStorage.List);
+            EntityId entity0_0 = world.CreateEntityId();
+            EntityId entity1_0 = world.CreateEntityId();
+            world.SetComponent<NumberComponent>(entity0_0, new(5));
+            world.SetComponent<NumberComponent>(entity1_0, new(10));
+            world.DestroyEntity(entity0_0);
+            EntityId _entity0_1 = world.CreateEntityId();
+            string json = JsonConvert.SerializeObject(world);
+            Assert.AreEqual("{}", json);
         }
     }
 }
