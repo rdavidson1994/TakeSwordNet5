@@ -1,31 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace TakeSword
 {
 
     public class World : IWorld
     {
+
         // Tracks the relationship between types and the component ID/index assigned to that type.
+        [JsonProperty]
         private readonly Dictionary<Type, int> componentIdsByType = new();
         // Tracks the reason each Type was registered, for more detailed error message.
+        [JsonProperty]
         private readonly Dictionary<Type, string> registrationReasonByType = new();
         // Tracks which types have been registered as collection membership components
+        [JsonProperty]
         private readonly HashSet<Type> membershipComponentTypes = new();
         // Stores all data for all components.
         // The index for this list is the component ID.
+        [JsonProperty]
         private readonly List<IComponentStorage> componentData = new();
         // Stores factory instances used to construct wrapper types of each component. 
         // The index for this list is the component ID.
+        [JsonProperty]
         private readonly List<IWrapperFactory> writeWrapperFactories = new();
         // The largest number of entities the world can contain before needing a resize.
+        [JsonProperty]
         private int maxEntityCount = 0;
         // Tracks which entity indexes are available to be reclaimed.
+        [JsonProperty]
         private readonly DeadIndexList deadIndexes = new();
         // Tracks the generation number for each entity. The index for this list is the entity index.
+        [JsonProperty]
         private readonly List<int> generationByEntityIndex = new();
         // Stores each game system, in order of execution.
+        [JsonProperty]
         private readonly List<GameSystem> Systems = new();
 
         private void ReserveType(Type type, string reason)
