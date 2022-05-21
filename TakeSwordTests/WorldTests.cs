@@ -156,7 +156,9 @@ namespace TakeSwordTests
             world.SetComponent<NumberComponent>(entity0_0, new(5));
             world.SetComponent<NumberComponent>(entity1_0, new(10));
             world.DestroyEntity(entity0_0);
-            EntityId _entity0_1 = world.CreateEntityId();
+            EntityId entity0_1 = world.CreateEntityId();
+            world.SetComponent(entity0_1, new BarComponent(10, 20));
+            world.SetComponent(entity0_1, new FooComponent("look, it's entity0_1!"));
             string json = world.ToJson();
             Assert.Inconclusive(json);
         }
