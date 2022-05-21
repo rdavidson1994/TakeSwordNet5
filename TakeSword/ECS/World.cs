@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 
 namespace TakeSword
 {
-
     public class World : IWorld
     {
         private static JsonConverter[] GetJsonConverters() => new JsonConverter[] {
@@ -80,6 +79,8 @@ namespace TakeSword
         // Stores each game system, in order of execution.
         // This one doesn't get serialized, we just go with whatever systems the application wants to install at load-time
         private readonly List<GameSystem> Systems = new();
+        // Records how many turns the game has lasted
+        public int IterationCount { get; private set; }
 
         private void ReserveType(Type type, string reason)
         {
@@ -208,6 +209,7 @@ namespace TakeSword
             {
                 RunSystem(system);
             }
+            IterationCount += 1;
         }
 
         private object? GetWrappedComponent(ParameterKey parameterKey, int entityIndex)
