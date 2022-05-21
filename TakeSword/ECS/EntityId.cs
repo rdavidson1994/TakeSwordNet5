@@ -1,10 +1,13 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace TakeSword
 {
     public struct EntityId
     {
+        [JsonProperty]
         internal int index;
+        [JsonProperty]
         internal int generation;
 
         internal EntityId(int index, int generation)

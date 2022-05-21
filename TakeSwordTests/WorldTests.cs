@@ -154,11 +154,20 @@ namespace TakeSwordTests
             EntityId entity0_0 = world.CreateEntityId();
             EntityId entity1_0 = world.CreateEntityId();
             world.SetComponent<NumberComponent>(entity0_0, new(5));
+            world.SetComponent(entity0_0, new FooComponent("sure hope I don't die before this gets printed!"));
             world.SetComponent<NumberComponent>(entity1_0, new(10));
             world.DestroyEntity(entity0_0);
             EntityId entity0_1 = world.CreateEntityId();
             world.SetComponent(entity0_1, new BarComponent(10, 20));
             world.SetComponent(entity0_1, new FooComponent("look, it's entity0_1!"));
+            string json = world.ToJson();
+            Assert.Inconclusive(json);
+        }
+
+        [Test]
+        public void SerializationOfFullWorldYieldsExpectedJson()
+        {
+            WorldSetup.Apply(world, out Entity _, out Entity _);
             string json = world.ToJson();
             Assert.Inconclusive(json);
         }

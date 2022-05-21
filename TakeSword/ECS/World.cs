@@ -10,7 +10,9 @@ namespace TakeSword
     {
         public string ToJson()
         {
-            return JsonConvert.SerializeObject(this, Formatting.Indented, new [] { new DeadIndexList.CustomJsonConverter() });
+            return JsonConvert.SerializeObject(this, Formatting.None,
+                new DeadIndexList.CustomJsonConverter(),
+                new ListComponentStorage.CustomJsonConverter());
         }
         private class CustomJsonConverter : JsonConverter
         {
@@ -56,7 +58,7 @@ namespace TakeSword
         [JsonProperty]
         private readonly List<int> generationByEntityIndex = new();
         // Stores each game system, in order of execution.
-        [JsonProperty]
+        // This one doesn't get serialized, we just go with whatever systems the application wants to install at load-time
         private readonly List<GameSystem> Systems = new();
 
         private void ReserveType(Type type, string reason)
