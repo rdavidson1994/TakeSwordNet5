@@ -6,8 +6,9 @@ namespace TakeSwordTests
 {
     public class WorldTests
     {
-        private record FooComponent();
-        private record BarComponent();
+        private record FooComponent(string FooContent);
+
+        private record BarComponent(int BarRadius, int BarLength);
         private record NumberComponent(int Number);
 
         private World world;
@@ -20,7 +21,7 @@ namespace TakeSwordTests
         [Test]
         public void CreateEntity_UnregistedComponent_ThrowsException()
         {
-            Assert.Throws<ComponentException>(() => world.CreateEntityId(new FooComponent()));
+            Assert.Throws<ComponentException>(() => world.CreateEntityId(new FooComponent("some words")));
         }
 
         [Test]
@@ -34,8 +35,8 @@ namespace TakeSwordTests
         public void SetComponent_UnregisteredComponent_ThrowsException()
         {
             world.RegisterComponent<FooComponent>();
-            var entity = world.CreateEntityId(new FooComponent());
-            Assert.Throws<ComponentException>(() => world.SetComponent(entity, new BarComponent()));
+            var entity = world.CreateEntityId(new FooComponent("hello"));
+            Assert.Throws<ComponentException>(() => world.SetComponent(entity, new BarComponent(10, 20)));
         }
 
         [Test]
@@ -140,7 +141,23 @@ namespace TakeSwordTests
             world.SetComponent<NumberComponent>(entity1_0, new(10));
             world.DestroyEntity(entity0_0);
             EntityId _entity0_1 = world.CreateEntityId();
-            string json = JsonConvert.SerializeObject(world, Formatting.Indented);
+            string json = world.ToJson();
+            Assert.Inconclusive(json);
+        }
+
+        [Test]
+        public void SerializationYieldsExpectedJson2()
+        {
+            world.RegisterComponent<NumberComponent>(ComponentStorage.List);
+            world.RegisterComponent<FooComponent>(ComponentStorage.List);
+            world.RegisterComponent<BarComponent>(ComponentStorage.List);
+            EntityId entity0_0 = world.CreateEntityId();
+            EntityId entity1_0 = world.CreateEntityId();
+            world.SetComponent<NumberComponent>(entity0_0, new(5));
+            world.SetComponent<NumberComponent>(entity1_0, new(10));
+            world.DestroyEntity(entity0_0);
+            EntityId _entity0_1 = world.CreateEntityId();
+            string json = world.ToJson();
             Assert.Inconclusive(json);
         }
     }

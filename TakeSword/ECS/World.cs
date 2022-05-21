@@ -8,7 +8,27 @@ namespace TakeSword
 
     public class World : IWorld
     {
+        public string ToJson()
+        {
+            return JsonConvert.SerializeObject(this, Formatting.Indented, new [] { new DeadIndexList.CustomJsonConverter() });
+        }
+        private class CustomJsonConverter : JsonConverter
+        {
+            public override bool CanConvert(Type objectType)
+            {
+                return false;
+            }
 
+            public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)
+            {
+                throw new NotImplementedException();
+            }
+        }
         // Tracks the relationship between types and the component ID/index assigned to that type.
         [JsonProperty]
         private readonly Dictionary<Type, int> componentIdsByType = new();
