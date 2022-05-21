@@ -164,11 +164,40 @@ namespace TakeSwordTests
             Assert.Inconclusive(json);
         }
 
+        private class FakePlayerIO : IPlayerIO
+        {
+            public string ReadLine()
+            {
+                return "wait";
+            }
+
+            public void Write(string message)
+            {
+                
+            }
+
+            public void WriteLine(string message)
+            {
+                
+            }
+        }
+
+
         [Test]
         public void SerializationOfFullWorldYieldsExpectedJson()
         {
-            WorldSetup.Apply(world, out Entity _, out Entity _);
+            WorldSetup.Apply(world, new FakePlayerIO(), out Entity _, out Entity _);
             string json = world.ToJson();
+            Assert.Inconclusive(json);
+        }
+
+        [Test]
+        [Ignore("Ignored WIP test")]
+        public void RoundTripSerializationOfFullWorldIsSound()
+        {
+            WorldSetup.Apply(world, new FakePlayerIO(), out Entity _, out Entity _);
+            string json = world.ToJson();
+            World deserialized = World.FromJson(json);
             Assert.Inconclusive(json);
         }
     }

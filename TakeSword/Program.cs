@@ -8,8 +8,9 @@ namespace TakeSword
     {
         public static void Main()
         {
+            IPlayerIO io = new ConsolePlayerIO();
             World world = new();
-            WorldSetup.Apply(world, out Entity playerEntity, out Entity startLocation);
+            WorldSetup.Apply(world, io, out Entity playerEntity, out Entity startLocation);
             OutputEntry description = DescriptionUtilities.GetDescription(startLocation, playerEntity);
             Console.WriteLine(description.AsPlainText());
 

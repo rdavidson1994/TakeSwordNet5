@@ -20,7 +20,13 @@ namespace TakeSword
                     throw new NotImplementedException("Didn't implement json " +
                         "deserialization on top of previous values");
                 }
-                throw new NotImplementedException("Still have to implement deserialization");
+                List<object?>? deserializedObjectList = serializer.Deserialize<List<object?>>(reader);
+                if (deserializedObjectList is null)
+                {
+                    throw new Exception("Deserialization of ListComponentStorage returned null");
+                }
+
+                return new ListComponentStorage(deserializedObjectList);
             }
 
             public override void WriteJson(
@@ -40,9 +46,15 @@ namespace TakeSword
         }
         private readonly List<object?> innerList;
 
+
         public ListComponentStorage(int count)
         {
             innerList = new List<object?>(new object?[count]);
+        }
+
+        private ListComponentStorage(List<object?> innerList)
+        {
+            this.innerList = innerList;
         }
 
         public object? this[int index]

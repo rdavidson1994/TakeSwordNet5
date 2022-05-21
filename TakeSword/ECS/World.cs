@@ -8,12 +8,32 @@ namespace TakeSword
 
     public class World : IWorld
     {
+        private static JsonConverter[] GetJsonConverters() => new JsonConverter[] {
+            new DeadIndexList.CustomJsonConverter(),
+            new ListComponentStorage.CustomJsonConverter(),
+            new IComponentStorage.CustomJsonConverter()
+        };
         public string ToJson()
         {
-            return JsonConvert.SerializeObject(this, Formatting.None,
-                new DeadIndexList.CustomJsonConverter(),
-                new ListComponentStorage.CustomJsonConverter());
+            Dictionary<string, object> outputData = new()
+            {
+                ["_componentData"] = componentData,
+                ["_deadIndexes"] = deadIndexes,
+                ["_componentIdsByType"] = componentIdsByType,
+                ["_generationByEntityIndex"] = generationByEntityIndex,
+                ["_maxEntityCount"] = maxEntityCount,
+                ["_componentIdsByType"] = componentIdsByType
+            };
+            return JsonConvert.SerializeObject(outputData, Formatting.None, GetJsonConverters());
         }
+
+        public static World FromJson(string json)
+        {
+            return JsonConvert.DeserializeObject<World>(json, GetJsonConverters())
+
+                 ?? throw new Exception("Deserialization yielded null object for world");
+        }
+
         private class CustomJsonConverter : JsonConverter
         {
             public override bool CanConvert(Type objectType)
@@ -46,7 +66,7 @@ namespace TakeSword
         private readonly List<IComponentStorage> componentData = new();
         // Stores factory instances used to construct wrapper types of each component. 
         // The index for this list is the component ID.
-        [JsonProperty]
+        // Not included in Json output, should be correct after setup
         private readonly List<IWrapperFactory> writeWrapperFactories = new();
         // The largest number of entities the world can contain before needing a resize.
         [JsonProperty]

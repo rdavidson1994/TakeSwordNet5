@@ -5,7 +5,7 @@ namespace TakeSword
 {
     public static class WorldSetup
     {
-        public static void Apply(World world, out Entity player, out Entity startLocation)
+        public static void Apply(World world, IPlayerIO io, out Entity player, out Entity startLocation)
         {
             // Component registration
             world.RegisterComponent<Senses>();
@@ -30,10 +30,9 @@ namespace TakeSword
             Death.Install(world);
             Motion.SystemInstall(world);
 
-
             // Entity creation
             VerbSuite<Entity> verbSuite = new(VerbUtil.GenerateVerbs());
-            IActor<Entity> playerAI = new Player<Entity>(verbSuite, new ConsolePlayerIO());
+            IActor<Entity> playerAI = new Player<Entity>(verbSuite, io);
             player = world.CreateEntity(
                 new Name("player"),
                 new Visibility(),
